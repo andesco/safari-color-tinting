@@ -21,6 +21,7 @@ build/
 
 # Cloudflare Pages
 .github/
+.wrangler/
 
 # Project Specific
 .env

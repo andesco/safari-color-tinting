@@ -60,7 +60,7 @@ Safari uses the luma (perceived brightness) of the selected color to determine i
 
 ## Safari Settings
 
-Users can enable or disable browser UI color tinting in Safari:
+Users can enable or disable browser UI color tinting in Safari 26:
 
 <!-- :icon-chevron-right: &rsaquo; -->
 <!-- :icon-checkbox: ✓ -->

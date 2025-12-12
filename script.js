@@ -1066,6 +1066,12 @@ ${headContent ? headContent + '\n' : ''}</head>
     // then update the pickers to reflect the new values
     setInitialColorsFromURL();
 
+    // Set fixed elements display based on initial checkbox state
+    if (fixedCheckbox && !fixedCheckbox.checked) {
+        if (fixedTopElement) fixedTopElement.style.display = 'none';
+        if (fixedBottomElement) fixedBottomElement.style.display = 'none';
+    }
+
     // Force update all pickers after URL values are applied
     // Use the Color class to parse the input value and set picker color
     if (bodyColorPicker) {
