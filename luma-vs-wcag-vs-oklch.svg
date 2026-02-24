@@ -12,7 +12,7 @@
   <text x="52" y="20" text-anchor="end" class="header">Hex</text>
   <text x="110" y="20" text-anchor="middle" class="header">Luma Y</text>
   <text x="212" y="20" text-anchor="middle" class="header">WCAG W</text>
-  <text x="314" y="20" text-anchor="middle" class="header">OKLCH L</text>
+  <text x="314" y="20" text-anchor="middle" class="header">Oklab L</text>
 
   <!-- Row 1: #9933ff -->
   <text x="52" y="43" text-anchor="end" class="hex">#9933ff</text>
