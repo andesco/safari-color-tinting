@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 374 195" font-family="ui-monospace, SFMono-Regular, monospace">
   <style>
-    .header { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; fill: #888; }
+    .header { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; fill: #888; }
     .hex { font-size: 10px; fill: #cc0; font-weight: 600; }
     .cell-text { font-size: 10px; font-weight: 600; }
   </style>
@@ -9,8 +9,8 @@
   <rect width="374" height="195" fill="#1a1a1a" rx="6"/>
 
   <!-- Column headers -->
-  <text x="52" y="20" text-anchor="end" class="header">Hex</text>
-  <text x="110" y="20" text-anchor="middle" class="header">Luma Y</text>
+  <text x="52" y="20" text-anchor="end" class="header">HEX</text>
+  <text x="110" y="20" text-anchor="middle" class="header">LUMA Y</text>
   <text x="212" y="20" text-anchor="middle" class="header">WCAG W</text>
   <text x="314" y="20" text-anchor="middle" class="header">Oklab L</text>
 
