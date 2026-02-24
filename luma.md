@@ -17,6 +17,11 @@ Blue     | `B`      | 0-255 |  7.22%
 Y = ( 0.2126 × R ) + ( 0.7152 × G ) + ( 0.0722 × B )
 ````
 
+### Output Range
+- **minimum**: 0 → Luma value for black `#000000`
+- **maximum**: 255 → Luma value for white `#FFFFFF`
+- **midpoint**: 127.5
+
 ### JavaScript Implementation
 
 ```javascript
@@ -39,27 +44,34 @@ function selectThemeWithLuma(bgColor) {
 }
 ```
 
-## Key Characteristics
+## Alternatives
 
-### No Gamma Correction
-Unlike [relative luminance][WCAG] in <abbr title="World Wide Web Consortium">W3C</abbr> Accessibility Guidelines, the ITU implementation applies the coefficients directly to gamma-corrected RGB values for an approach that is simpler (no complex gamma correction) and faster (fewer operations per calculation).
+### WCAG Relative Luminance
+[Relative luminance][WCAG] in <abbr title="World Wide Web Consortium">W3C</abbr> Accessibility Guidelines uses the same Rec. 709 coefficients (0.2126, 0.7152, 0.0722) but applies a complex (slow) gamma correction formula to linearize sRGB values before weighting. This produces a 0-1 luminance value used to calculate accessibility contrast ratios. Rec. 709 Luma skips this gamma correction step, applying coefficients directly to sRGB values.
 
-| Feature | Rec. 709 Luma | WCAG Relative Luminance |
-|---------|---------------|-------------------------|
-| RGB Coefficients | 0.2126, 0.7152, 0.0722 | 0.2126, 0.7152, 0.0722 |
-| Gamma Correction | No | Yes: complex formula |
-| Output Range | 0-255 | 0-1 |
-| Threshold | 127.5 | 0.179 |
-| Use Case | Perceived Brightness | Accessibility Contrast Ratios |
+### OKLCH
 
-### Output Range
-- **minimum**: 0 → Luma value for black `#000000`
-- **maximum**: 255 → Luma value for white `#FFFFFF`
-- **midpoint**: 127.5
+[OKLCH][Oklab] is a perceptual color model by Björn Ottosson. Its Lightness value `L` represents perceived brightness through a matrix transform and multi-step conversion: sRGB → Linear RGB → LMS cone response → cube root → Oklab. Unlike Luma, equal steps in OKLCH `L` correspond to equal perceived brightness differences.
+
+### Comparison
+
+| Feature | ITU Rec. 709 <br> Luma | WCAG <br> Relative Luminance | OKLCH <br> Lightness |
+|---------|---------------|-------------------------|-----------------|
+| Gamma Correction | No | Yes: complex formula | Yes: complex matrix transformation |
+| Output Range | 0-255 | 0-1 | 0-1 |
+| Threshold | 127.5 | 0.179 | 0.5 |
+| Use Case | Perceived Brightness | Accessibility Contrast Ratios | Perceptual Color Manipulation |
+
+### [Luma vs. WGAG vs. OKLCH][vs.]
+
+<img src="luma-vs-wcag-vs-oklch.svg" alt="Luma Y vs WCAG Relative Luminance vs OKLCH L — 6 colors where Y and L disagree on text color">
+
+source: [Luma vs. WGAG vs. OKLCH][vs.]
 
 ## Apple & Perceived Brightness
 
-Apple uses the luma **midpoint** (127.5) to determine text color on backgrounds. Apple  divides the full luma range into two equal halves, providing a simple and consistent decision boundary.
+
+Apple uses [`CGColorSpace.itur_709`][Apple] and the luma `Y` **midpoint** (127.5) to set text color based on background color. Apple divides the full luma range into equal halves, providing a simple and consistent decision boundary.
 
 When Safari uses a webpage <nobr><code>background-color</code></nobr> to color browser UI, it also calculates the <nobr><code>background-color</code></nobr> luma to set browser UI text color:
 
@@ -68,7 +80,8 @@ background is considered **dark** → Safari uses **light text**
 - **Luma > 127.5**: \
 background is considered **light** → Safari uses **dark text**
 
-This midpoint threshold ensures maximum legibility by selecting text colors that provide strong contrast against the background.
+This midpoint threshold ensures legibility by selecting text colors that provide strong contrast against the background.
+
 
 ### Examples
 
@@ -88,9 +101,12 @@ This midpoint threshold ensures maximum legibility by selecting text colors that
 - [W3C Accessibility Guidelines: relative luminance][WCAG]
 - [Wikipedia: Luma][wiki]
 - [Apple Developer: System-Defined Color Spaces][Apple]
+- [Björn Ottosson: A perceptual color space for image processing (Oklab)][Oklab]
 
 
 [ITU]: https://www.itu.int/rec/R-REC-BT.709/
 [WCAG]: https://www.w3.org/WAI/GL/wiki/Relative_luminance
 [wiki]: https://en.wikipedia.org/wiki/Luma_(video)
 [Apple]: https://developer.apple.com/documentation/coregraphics/cgcolorspace/itur_709
+[Oklab]: https://bottosson.github.io/posts/oklab/
+[vs.]: https://safari-color-tinting.pages.dev/luma-vs-wcag-vs-oklch.html

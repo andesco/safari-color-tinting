@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luma Y vs OKLCH L — Text/Background Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a1a; color: #eee; }
+  header { padding: 20px 24px 12px; max-width: 1400px; margin: 0 auto; }
+  header h1 { font-size: 1.4rem; margin-bottom: 4px; text-align: center; }
+  header h1 code {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.9em; background: #2d2d2d; color: #e6e6e6;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .column-headers span.sortable {
+    cursor: pointer;
+  }
+  .column-headers span.sortable:hover { color: #6cf; }
+  .column-headers span.sortable::after {
+    content: ' \25B2'; opacity: 0; transition: opacity 0.15s;
+  }
+  .column-headers span.sortable:hover::after { opacity: 0.5; }
+  .column-headers span.sortable.active::after { opacity: 1; }
+  .column-headers span.sortable.active.desc::after { content: ' \25BC'; }
+  .column-headers span.sortable.active:hover::after {
+    content: ' \25BC';
+  }
+  .column-headers span.sortable.active.desc:hover::after {
+    content: ' \25B2';
+  }
+  .column-headers {
+    display: grid; grid-template-columns: 100px 1fr 1fr minmax(0, 220px);
+    max-width: 1400px; margin: 12px auto 0; padding: 0 24px;
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888;
+  }
+  .column-headers span:nth-child(1) { text-align: right; padding-right: 8px; }
+  .column-headers span:nth-child(2),
+  .column-headers span:nth-child(3) { text-align: center; }
+  .column-headers span:nth-child(4) { padding-left: 8px; }
+  #grid {
+    max-width: 1400px; margin: 6px auto 24px; padding: 0 24px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .row {
+    display: grid; grid-template-columns: 100px 1fr 1fr minmax(0, 220px); gap: 2px;
+    min-height: 32px; align-items: stretch;
+  }
+  .hex, .oklch-label {
+    font-size: 0.7rem; font-family: ui-monospace, monospace;
+    display: flex; align-items: center; color: #777;
+  }
+  .hex { padding-right: 8px; justify-content: flex-end; }
+  .oklch-label {
+    padding-left: 8px; white-space: nowrap; overflow: hidden;
+    text-overflow: clip;
+  }
+  .cell {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-family: ui-monospace, monospace;
+    font-weight: 600; border-radius: 3px; padding: 4px 8px;
+    min-height: 32px;
+  }
+  .hex.disagree, .oklch-label.disagree { color: #ff0; font-weight: 600; }
+  .stats {
+    max-width: 1400px; margin: 0 auto; padding: 0 24px;
+    font-size: 0.85rem; color: #aaa; text-align: center;
+  }
+  .stats strong { color: #ff0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rec. 709 Luma <code>Y</code> vs. OKLCH Lightness <code>L</code></h1>
+</header>
+
+<div class="stats" id="stats"></div>
+
+<div class="column-headers">
+  <span>Hex</span>
+  <span class="sortable" data-sort="luma">Luma Y (Rec. 709)</span>
+  <span class="sortable active" data-sort="oklch">OKLCH L (Oklab)</span>
+  <span>OKLCH</span>
+</div>
+
+<div id="grid"></div>
+
+<script>
+function lumaY(r, g, b) {
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function srgbToLinear(c) {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function oklab(r, g, b) {
+  const lr = srgbToLinear(r), lg = srgbToLinear(g), lb = srgbToLinear(b);
+  const l = 0.4122214708*lr + 0.5363325363*lg + 0.0514459929*lb;
+  const m = 0.2119034982*lr + 0.6806995451*lg + 0.1073969566*lb;
+  const s = 0.0883024619*lr + 0.2220049874*lg + 0.6696925508*lb;
+  const l_ = Math.cbrt(l), m_ = Math.cbrt(m), s_ = Math.cbrt(s);
+  const L = 0.2104542553*l_ + 0.7936177850*m_ - 0.0040720468*s_;
+  const a = 1.9779984951*l_ - 2.4285922050*m_ + 0.4505937099*s_;
+  const bb = 0.0259040371*l_ + 0.7827717662*m_ - 0.8086757660*s_;
+  return { L, a, b: bb };
+}
+
+function oklch(r, g, b) {
+  const { L, a, b: bb } = oklab(r, g, b);
+  const C = Math.sqrt(a * a + bb * bb);
+  let H = Math.atan2(bb, a) * 180 / Math.PI;
+  if (H < 0) H += 360;
+  return { L, C, H };
+}
+
+function hexFromRGB(r, g, b) {
+  return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+}
+
+// Build color data
+const channels = [0x00, 0x33, 0x66, 0x99, 0xcc, 0xff];
+const data = [];
+for (const r of channels)
+  for (const g of channels)
+    for (const b of channels) {
+      const { L, C, H } = oklch(r, g, b);
+      const Y = lumaY(r, g, b);
+      data.push({ rgb: [r, g, b], Y, L, C, H });
+    }
+
+let currentSort = 'oklch';
+let ascending = true;
+
+function render(sortBy, asc) {
+  const sorted = [...data];
+  const dir = asc ? 1 : -1;
+  if (sortBy === 'luma') {
+    sorted.sort((a, b) => dir * (a.Y - b.Y));
+  } else {
+    sorted.sort((a, b) => dir * (a.L - b.L));
+  }
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  let disagreeCount = 0;
+
+  for (const { rgb: [r, g, b], Y, L, C, H } of sorted) {
+    const lumaDark = Y <= 127.5;
+    const oklchDark = L <= 0.5;
+    const disagree = lumaDark !== oklchDark;
+    if (disagree) disagreeCount++;
+    const bg = hexFromRGB(r, g, b);
+    const oklchStr = `oklch(${(L * 100).toFixed(1)}% ${C.toFixed(3)} ${H.toFixed(1)})`;
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML =
+      `<div class="hex${disagree ? ' disagree' : ''}">${bg}</div>` +
+      `<div class="cell" style="background:${bg};color:${lumaDark ? '#fff' : '#000'}">` +
+        `Y=${Y.toFixed(1)} → ${lumaDark ? 'light' : 'dark'} text</div>` +
+      `<div class="cell" style="background:${bg};color:${oklchDark ? '#fff' : '#000'}">` +
+        `L=${L.toFixed(3)} → ${oklchDark ? 'light' : 'dark'} text</div>` +
+      `<div class="oklch-label${disagree ? ' disagree' : ''}">${oklchStr}</div>`;
+    fragment.appendChild(row);
+  }
+
+  grid.appendChild(fragment);
+  document.getElementById('stats').innerHTML =
+    `<strong>${disagreeCount} disagreements</strong> out of ${data.length} colors ` +
+    `(${(100 * disagreeCount / data.length).toFixed(1)}%)`;
+}
+
+// Sort header handling
+const sortHeaders = document.querySelectorAll('.column-headers .sortable');
+sortHeaders.forEach(span => {
+  span.addEventListener('click', () => {
+    const sortBy = span.dataset.sort;
+    if (sortBy === currentSort) {
+      ascending = !ascending;
+    } else {
+      currentSort = sortBy;
+    }
+    sortHeaders.forEach(s => { s.classList.remove('active'); s.classList.remove('desc'); });
+    span.classList.add('active');
+    if (!ascending) span.classList.add('desc');
+    render(currentSort, ascending);
+  });
+});
+
+document.querySelector('.sortable[data-sort="oklch"]').classList.add('active');
+render('oklch', true);
+</script>
+</body>
+</html>

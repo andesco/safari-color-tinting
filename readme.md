@@ -52,11 +52,9 @@ Safari 26 will then use the <nobr><code>background-color</code></nobr> of the `<
 body { background-color: #0088FF; }
 ```
 
-## Safari: Luma
+## [**Luma: Apple & Perceived Brightness**][luma]
 
-Safari uses the luma (perceived brightness) of the selected color to determine if browser UI text should be dark or light:
-
-### [**Luma: Apple & Perceived Brightness**][luma]
+Safari uses the [luma] (perceived brightness) of the selected color to determine if the browser UI text should be dark or light.
 
 ## Safari Settings
 

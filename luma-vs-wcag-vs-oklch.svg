@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 374 195" font-family="ui-monospace, SFMono-Regular, monospace">
+  <style>
+    .header { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; fill: #888; }
+    .hex { font-size: 10px; fill: #cc0; font-weight: 600; }
+    .cell-text { font-size: 10px; font-weight: 600; }
+  </style>
+
+  <!-- Background -->
+  <rect width="374" height="195" fill="#1a1a1a" rx="6"/>
+
+  <!-- Column headers -->
+  <text x="52" y="20" text-anchor="end" class="header">Hex</text>
+  <text x="110" y="20" text-anchor="middle" class="header">Luma Y</text>
+  <text x="212" y="20" text-anchor="middle" class="header">WCAG W</text>
+  <text x="314" y="20" text-anchor="middle" class="header">OKLCH L</text>
+
+  <!-- Row 1: #9933ff -->
+  <text x="52" y="43" text-anchor="end" class="hex">#9933ff</text>
+  <rect x="60" y="28" width="100" height="24" rx="3" fill="#9933ff"/>
+  <text x="110" y="43" text-anchor="middle" class="cell-text" fill="#fff">Y=87.4</text>
+  <rect x="162" y="28" width="100" height="24" rx="3" fill="#9933ff"/>
+  <text x="212" y="43" text-anchor="middle" class="cell-text" fill="#fff">W=0.1636</text>
+  <rect x="264" y="28" width="100" height="24" rx="3" fill="#9933ff"/>
+  <text x="314" y="43" text-anchor="middle" class="cell-text" fill="#000">L=0.582</text>
+
+  <!-- Row 2: #996699 -->
+  <text x="52" y="69" text-anchor="end" class="hex">#996699</text>
+  <rect x="60" y="54" width="100" height="24" rx="3" fill="#996699"/>
+  <text x="110" y="69" text-anchor="middle" class="cell-text" fill="#fff">Y=116.5</text>
+  <rect x="162" y="54" width="100" height="24" rx="3" fill="#996699"/>
+  <text x="212" y="69" text-anchor="middle" class="cell-text" fill="#000">W=0.1857</text>
+  <rect x="264" y="54" width="100" height="24" rx="3" fill="#996699"/>
+  <text x="314" y="69" text-anchor="middle" class="cell-text" fill="#000">L=0.582</text>
+
+  <!-- Row 3: #cc3399 -->
+  <text x="52" y="95" text-anchor="end" class="hex">#cc3399</text>
+  <rect x="60" y="80" width="100" height="24" rx="3" fill="#cc3399"/>
+  <text x="110" y="95" text-anchor="middle" class="cell-text" fill="#fff">Y=90.9</text>
+  <rect x="162" y="80" width="100" height="24" rx="3" fill="#cc3399"/>
+  <text x="212" y="95" text-anchor="middle" class="cell-text" fill="#fff">W=0.1750</text>
+  <rect x="264" y="80" width="100" height="24" rx="3" fill="#cc3399"/>
+  <text x="314" y="95" text-anchor="middle" class="cell-text" fill="#000">L=0.587</text>
+
+  <!-- Row 4: #009900 -->
+  <text x="52" y="121" text-anchor="end" class="hex">#009900</text>
+  <rect x="60" y="106" width="100" height="24" rx="3" fill="#009900"/>
+  <text x="110" y="121" text-anchor="middle" class="cell-text" fill="#fff">Y=109.4</text>
+  <rect x="162" y="106" width="100" height="24" rx="3" fill="#009900"/>
+  <text x="212" y="121" text-anchor="middle" class="cell-text" fill="#000">W=0.2278</text>
+  <rect x="264" y="106" width="100" height="24" rx="3" fill="#009900"/>
+  <text x="314" y="121" text-anchor="middle" class="cell-text" fill="#000">L=0.592</text>
+
+  <!-- Row 5: #cc00cc -->
+  <text x="52" y="147" text-anchor="end" class="hex">#cc00cc</text>
+  <rect x="60" y="132" width="100" height="24" rx="3" fill="#cc00cc"/>
+  <text x="110" y="147" text-anchor="middle" class="cell-text" fill="#fff">Y=58.1</text>
+  <rect x="162" y="132" width="100" height="24" rx="3" fill="#cc00cc"/>
+  <text x="212" y="147" text-anchor="middle" class="cell-text" fill="#fff">W=0.1720</text>
+  <rect x="264" y="132" width="100" height="24" rx="3" fill="#cc00cc"/>
+  <text x="314" y="147" text-anchor="middle" class="cell-text" fill="#000">L=0.593</text>
+
+  <!-- Row 6: #009933 -->
+  <text x="52" y="173" text-anchor="end" class="hex">#009933</text>
+  <rect x="60" y="158" width="100" height="24" rx="3" fill="#009933"/>
+  <text x="110" y="173" text-anchor="middle" class="cell-text" fill="#fff">Y=113.1</text>
+  <rect x="162" y="158" width="100" height="24" rx="3" fill="#009933"/>
+  <text x="212" y="173" text-anchor="middle" class="cell-text" fill="#000">W=0.2302</text>
+  <rect x="264" y="158" width="100" height="24" rx="3" fill="#009933"/>
+  <text x="314" y="173" text-anchor="middle" class="cell-text" fill="#000">L=0.595</text>
+</svg>
