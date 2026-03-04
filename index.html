@@ -53,7 +53,7 @@
         </div>
     </div>
 <!-- second card-container for fixed position background -->
-    <div class="card-container">
+    <div class="card-container" id="card-fixed">
         <h4 class="color-setting">Fixed Position Background</h4>
         <div class="color-picker-wrapper">
             <input type="checkbox" id="checkbox-fixed" class="color-checkbox">
@@ -61,6 +61,7 @@
                 <input type="text" id="color-picker-fixed" class="color-preview btn-appearance" value="#FF7700" autocomplete="off" spellcheck="false" data-format="hex" data-color-keywords="red,orange,yellow,lime,green,blue,indigo,violet,pink,white,black">
             </div>
         </div>
+        <a id="fixed-refresh-hint" class="refresh-hint" href="">↻ reload</a>
     </div>
 <!-- third card-container for meta theme -->
     <div class="card-container">
@@ -80,6 +81,29 @@
         <h4 class="code-example">Example Code</h4>
         <code id="code-gen-example" class="language-html code-gen"></code>
         <span class="learn-more">learn more: <a href="https://github.com/andesco/safari-color-tinting">andesco/safari-color-tinting</a></span>
+    </div>
+
+<!-- disqualifier test card -->
+    <div class="card-container disqualifier-test">
+        <h4>Prevent Sampling Fixed Position Elements</h4>
+        <p class="disqualifier-desc">Apply a neutral <code class="disqualifier-code">backdrop-filter</code> to a fixed position element to prevent Safari from sampling its background color.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-backdrop-enabled">
+                <code class="disqualifier-code">saturate(100%)</code>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-blur-enabled">
+                <code class="disqualifier-code">blur(0px)</code>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bdopacity-enabled">
+                <code class="disqualifier-code">opacity(1)</code>
+            </label>
+        </div>
+        <a id="disqualifier-refresh-hint" class="refresh-hint" href="">↻ reload</a>
+
     </div>
 
 <!-- fifth card-container for Safari How To -->

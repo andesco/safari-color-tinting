@@ -40,6 +40,15 @@ Safari will only use an element that is:
 div { position: fixed; bottom: 3px; width: 90%; background-color: #FF7700; }
 ```
 
+To prevent Safari from sampling the `background-color` of a fixed element (like a temporary banner or alert) add a neutral `backdrop-filter`:
+
+Safari does not re-sample fixed-position elements; subsequent DOM or style changes do not update the color of Safari UI.
+
+
+```css
+div { backdrop-filter`: `saturate(100%)` `blur(0px)` `opacity(1) }
+```
+
 ### `<body>`
 
 Safari 26 will then use the <nobr><code>background-color</code></nobr> of the `<body>` element if there are no suitable fixed elements.
@@ -51,6 +60,8 @@ Safari 26 will then use the <nobr><code>background-color</code></nobr> of the `<
 ```css
 body { background-color: #0088FF; }
 ```
+
+Safari re-samples `body` as needed. WebKit has a live observer that directly updates the the color of Safari UI as it changes.
 
 ## [**Luma: Apple & Perceived Brightness**][luma]
 
@@ -68,7 +79,7 @@ Users can enable or disable browser UI color tinting in Safari 26:
 
 &nbsp;
 
-## Web Standards Documentation:
+## Web Standards Documentation
 
 The `theme-color` meta tag remains part of web standards:
 

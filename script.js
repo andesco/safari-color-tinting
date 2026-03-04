@@ -355,7 +355,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
         const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
 
-        const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}`;
+        const bdSaturate = document.getElementById("test-backdrop-enabled");
+        const bdBlurEl   = document.getElementById("test-blur-enabled");
+        const bdOpEl     = document.getElementById("test-bdopacity-enabled");
+        let bfParam = '';
+        if (bdSaturate && bdSaturate.checked) bfParam = 's';
+        else if (bdBlurEl && bdBlurEl.checked) bfParam = 'b';
+        else if (bdOpEl   && bdOpEl.checked)   bfParam = 'o';
+
+        const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfParam ? `&bf=${bfParam}` : ''}`;
         const newUrl = window.location.origin + window.location.pathname + queryString;
         history.replaceState(null, '', newUrl);
     };
@@ -385,16 +393,28 @@ document.addEventListener('DOMContentLoaded', function() {
             bodyStyle = `background-color: ${bodyHex};`;
         }
 
+        const bdParts = [];
+        const bdSaturate = document.getElementById("test-backdrop-enabled");
+        const bdBlur     = document.getElementById("test-blur-enabled");
+        const bdOpacity  = document.getElementById("test-bdopacity-enabled");
+        if (bdSaturate && bdSaturate.checked) bdParts.push('saturate(100%)');
+        if (bdBlur     && bdBlur.checked)     bdParts.push('blur(0px)');
+        if (bdOpacity  && bdOpacity.checked)  bdParts.push('opacity(1)');
+
         let divStyle = 'position: fixed; top: 0;';
         if (fixedHex) {
             divStyle += ` background-color: ${fixedHex};`;
+        }
+        if (bdParts.length) {
+            divStyle += ` backdrop-filter: ${bdParts.join(' ')};`;
         }
         if (!fixedChecked) {
             divStyle += ' display: none;';
         }
 
         const codeExample = `<head>
-${headContent ? headContent + '\n' : ''}</head>
+${headContent || ''}
+</head>
 <body${bodyStyle ? ` style="${bodyStyle}"` : ''}>
     <div style="${divStyle}">
     </div>
@@ -498,11 +518,16 @@ ${headContent ? headContent + '\n' : ''}</head>
 
         updateURLParams();
         updateGeneratedCode();
+        document.dispatchEvent(new CustomEvent("fixedColorUpdated"));
     };
 
     // Define fixed and meta change handlers at module scope so they can be reused
     const handleFixedChange = function(e) {
         console.log('handleFixedChange called, value:', e.target.value, 'fixedColorPicker:', !!fixedColorPicker);
+        ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('visible');
+        });
         isUpdatingFixed = true;
         const value = e.target.value;
         // Allow empty values - just clear and don't set to "inherit"
@@ -917,6 +942,10 @@ ${headContent ? headContent + '\n' : ''}</head>
                 if (fixedTopElement) fixedTopElement.style.removeProperty('display');
                 if (fixedBottomElement) fixedBottomElement.style.removeProperty('display');
             }
+            ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('visible');
+            });
             updateURLParams();
             updateGeneratedCode();
         });
@@ -928,6 +957,15 @@ ${headContent ? headContent + '\n' : ''}</head>
         let bodyColorParam = urlParams.get('b');
         let metaColorParam = urlParams.get('m');
         let fixedColorParam = urlParams.get('f');
+
+        // Set backdrop-filter disqualifier checkbox from bf param before any updateURLParams call
+        const bfInit = urlParams.get('bf');
+        const bdSatInit = document.getElementById("test-backdrop-enabled");
+        const bdBlurInit = document.getElementById("test-blur-enabled");
+        const bdOpInit   = document.getElementById("test-bdopacity-enabled");
+        if (bdSatInit)  bdSatInit.checked  = bfInit === 's';
+        if (bdBlurInit) bdBlurInit.checked  = bfInit === 'b';
+        if (bdOpInit)   bdOpInit.checked    = bfInit === 'o';
 
         // Parse checkbox state and color
         // New format: "08F" or "0088FF" (checked, implicit) or "0,08F" or "0,0088FF" (unchecked, explicit)
@@ -1220,7 +1258,11 @@ ${headContent ? headContent + '\n' : ''}</head>
             const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
             const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
 
-            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}`;
+            const bdS = document.getElementById("test-backdrop-enabled");
+            const bdB = document.getElementById("test-blur-enabled");
+            const bdO = document.getElementById("test-bdopacity-enabled");
+            const bfP = (bdS && bdS.checked) ? 's' : (bdB && bdB.checked) ? 'b' : (bdO && bdO.checked) ? 'o' : '';
+            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfP ? `&bf=${bfP}` : ''}`;
             const shareUrl = window.location.origin + window.location.pathname + queryString;
 
             console.log('Share button clicked');
@@ -1281,7 +1323,11 @@ ${headContent ? headContent + '\n' : ''}</head>
             const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
             const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
 
-            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}`;
+            const bdS2 = document.getElementById("test-backdrop-enabled");
+            const bdB2 = document.getElementById("test-blur-enabled");
+            const bdO2 = document.getElementById("test-bdopacity-enabled");
+            const bfP2 = (bdS2 && bdS2.checked) ? 's' : (bdB2 && bdB2.checked) ? 'b' : (bdO2 && bdO2.checked) ? 'o' : '';
+            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfP2 ? `&bf=${bfP2}` : ''}`;
             const copyUrl = window.location.origin + window.location.pathname + queryString;
             console.log('Copy URL:', copyUrl);
 
@@ -1301,6 +1347,60 @@ ${headContent ? headContent + '\n' : ''}</head>
             }
         });
     }
+
+    // Disqualifier Test Controls
+    (() => {
+        const fixedEls = [
+            document.getElementById("fixed-top"),
+            document.getElementById("fixed-bottom"),
+        ].filter(Boolean);
+
+        const backdropEnabled   = document.getElementById("test-backdrop-enabled");
+        const blurEnabled       = document.getElementById("test-blur-enabled");
+        const bdOpacityEnabled  = document.getElementById("test-bdopacity-enabled");
+
+        if (!backdropEnabled) return; // card not present
+
+        const showRefreshHints = () => {
+            ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('visible');
+            });
+        };
+
+        const applyDisqualifiers = () => {
+            let bdStr = '';
+            if (backdropEnabled.checked)  bdStr = 'saturate(100%)';
+            else if (blurEnabled.checked) bdStr = 'blur(0px)';
+            else if (bdOpacityEnabled.checked) bdStr = 'opacity(1)';
+
+            fixedEls.forEach(el => {
+                el.style.backdropFilter = bdStr;
+                el.style.webkitBackdropFilter = bdStr;
+            });
+
+            updateURLParams();
+            updateGeneratedCode();
+        };
+
+        applyDisqualifiers();
+
+        [backdropEnabled, blurEnabled, bdOpacityEnabled].forEach(cb => {
+            cb.addEventListener("change", () => {
+                // Mutual exclusion — uncheck the others
+                if (cb.checked) {
+                    [backdropEnabled, blurEnabled, bdOpacityEnabled].forEach(other => {
+                        if (other !== cb) other.checked = false;
+                    });
+                }
+                applyDisqualifiers();
+                showRefreshHints();
+            });
+        });
+
+        // Re-apply when the color picker updates the fixed element's background
+        document.addEventListener("fixedColorUpdated", applyDisqualifiers);
+    })();
 
     // Safari Version Check
     const notSafariNotice = document.getElementById("not-safari-notice");
