@@ -481,3 +481,94 @@ footer a {
     margin-bottom: 0 !important;
 }
 
+/* Disqualifier badges */
+.disqualifier-badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.badge-prevents {
+    background: rgba(25, 135, 84, 0.15);
+    color: #198754;
+}
+
+.badge-sampled {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+}
+
+.dark-theme .badge-prevents {
+    background: rgba(25, 135, 84, 0.25);
+    color: #75b798;
+}
+
+.dark-theme .badge-sampled {
+    background: rgba(220, 53, 69, 0.25);
+    color: #ea868f;
+}
+
+/* Hidden tinting element */
+#hidden-tint-element {
+    display: none;
+    position: fixed;
+    bottom: -8px;
+    left: 0;
+    width: 90%;
+    min-height: 12px;
+    z-index: 1000;
+}
+
+/* Bypass transparent parent element */
+#bypass-element {
+    display: none;
+    position: fixed;
+    top: 4px;
+    left: 0;
+    width: 90%;
+    min-height: 15px;
+    z-index: 1000;
+    background-color: transparent;
+}
+
+#bypass-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Pseudo-element test */
+#pseudo-element {
+    display: none;
+    position: fixed;
+    top: 4px;
+    left: 0;
+    width: 90%;
+    min-height: 15px;
+    z-index: 1000;
+}
+
+#pseudo-element.use-before::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#pseudo-element.use-after::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+

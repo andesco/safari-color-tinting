@@ -30,6 +30,9 @@
 <body style="background-color: #0088FF;">
     <div id="fixed-top"></div>
     <div id="fixed-bottom"></div>
+    <div id="hidden-tint-element"></div>
+    <div id="bypass-element"><div id="bypass-child"></div></div>
+    <div id="pseudo-element"></div>
 
 <h1><a href="/">Safari Color Tinting: Demo</a></h1>
 
@@ -97,13 +100,102 @@
                 <input type="checkbox" id="test-blur-enabled">
                 <code class="disqualifier-code">blur(0px)</code>
             </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bdopacity-enabled">
-                <code class="disqualifier-code">opacity(1)</code>
-            </label>
         </div>
         <a id="disqualifier-refresh-hint" class="refresh-hint" href="">↻ reload</a>
 
+    </div>
+
+<!-- hidden tinting element card -->
+    <div class="card-container disqualifier-test">
+        <h4>Hidden Tinting Element</h4>
+        <p class="disqualifier-desc">A fixed element with <code class="disqualifier-code">bottom: -8px</code> and <code class="disqualifier-code">min-height: 12px</code> is sampled by Safari for toolbar tinting but is invisible to the user. Adjust the bottom offset to see when Safari stops sampling.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-hidden-tint-enabled">
+                Enable hidden tinting element
+            </label>
+        </div>
+        <div class="disqualifier-row" id="hidden-tint-offset-row">
+            <code class="disqualifier-code" id="hidden-tint-offset-label">bottom: -8px</code>
+            <input type="range" id="hidden-tint-offset" min="-20" max="10" value="-8" step="1">
+        </div>
+        <a id="hidden-tint-refresh-hint" class="refresh-hint" href="">↻ reload</a>
+    </div>
+
+<!-- bypass with transparent parent card -->
+    <div class="card-container disqualifier-test">
+        <h4>Bypass with Transparent Parent</h4>
+        <p class="disqualifier-desc">A fixed element with <code class="disqualifier-code">background-color: transparent</code> is invisible to Safari's algorithm. An <code class="disqualifier-code">position: absolute</code> child carries the visual styling, but Safari skips absolute children &mdash; so the toolbar tint falls through to the body background.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bypass-direct">
+                Direct background on fixed element
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bypass-transparent">
+                Transparent parent + absolute child
+            </label>
+        </div>
+        <a id="bypass-refresh-hint" class="refresh-hint" href="">↻ reload</a>
+    </div>
+
+<!-- visibility methods card -->
+    <div class="card-container disqualifier-test">
+        <h4>Visibility Methods</h4>
+        <p class="disqualifier-desc">Which CSS visibility methods prevent Safari from sampling a fixed element? Only <code class="disqualifier-code">display: none</code> is reliable. The others still get sampled.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-vis-display-none">
+                <code class="disqualifier-code">display: none</code>
+                <span class="disqualifier-badge badge-prevents">prevents</span>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-vis-opacity-zero">
+                <code class="disqualifier-code">opacity: 0</code>
+                <span class="disqualifier-badge badge-sampled">still sampled</span>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-vis-hidden">
+                <code class="disqualifier-code">visibility: hidden</code>
+                <span class="disqualifier-badge badge-sampled">still sampled</span>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-vis-pointer-none">
+                <code class="disqualifier-code">pointer-events: none</code>
+                <span class="disqualifier-badge badge-sampled">still sampled</span>
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bdopacity-enabled">
+                <code class="disqualifier-code">backdrop-filter: opacity(1)</code>
+                <span class="disqualifier-badge badge-prevents">prevents</span>
+            </label>
+        </div>
+        <a id="visibility-refresh-hint" class="refresh-hint" href="">↻ reload</a>
+    </div>
+
+<!-- pseudo-element exclusion card -->
+    <div class="card-container disqualifier-test">
+        <h4>Pseudo-Element Exclusion</h4>
+        <p class="disqualifier-desc"><code class="disqualifier-code">::before</code> and <code class="disqualifier-code">::after</code> pseudo-elements on fixed-position elements are NOT sampled by Safari's tinting algorithm. The background color from a pseudo-element is ignored.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-pseudo-direct">
+                Direct background on fixed element
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-pseudo-before">
+                Background via <code class="disqualifier-code">::before</code> pseudo-element
+            </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-pseudo-after">
+                Background via <code class="disqualifier-code">::after</code> pseudo-element
+            </label>
+        </div>
+        <a id="pseudo-refresh-hint" class="refresh-hint" href="">↻ reload</a>
     </div>
 
 <!-- fifth card-container for Safari How To -->

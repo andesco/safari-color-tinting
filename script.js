@@ -1372,7 +1372,7 @@ ${headContent || ''}
             let bdStr = '';
             if (backdropEnabled.checked)  bdStr = 'saturate(100%)';
             else if (blurEnabled.checked) bdStr = 'blur(0px)';
-            else if (bdOpacityEnabled.checked) bdStr = 'opacity(1)';
+            else if (bdOpacityEnabled && bdOpacityEnabled.checked) bdStr = 'opacity(1)';
 
             fixedEls.forEach(el => {
                 el.style.backdropFilter = bdStr;
@@ -1385,11 +1385,14 @@ ${headContent || ''}
 
         applyDisqualifiers();
 
-        [backdropEnabled, blurEnabled, bdOpacityEnabled].forEach(cb => {
+        const checkboxes = [backdropEnabled, blurEnabled];
+        if (bdOpacityEnabled) checkboxes.push(bdOpacityEnabled);
+
+        checkboxes.forEach(cb => {
             cb.addEventListener("change", () => {
                 // Mutual exclusion — uncheck the others
                 if (cb.checked) {
-                    [backdropEnabled, blurEnabled, bdOpacityEnabled].forEach(other => {
+                    checkboxes.forEach(other => {
                         if (other !== cb) other.checked = false;
                     });
                 }
@@ -1400,6 +1403,240 @@ ${headContent || ''}
 
         // Re-apply when the color picker updates the fixed element's background
         document.addEventListener("fixedColorUpdated", applyDisqualifiers);
+    })();
+
+    // Hidden Tinting Element Controls
+    (() => {
+        const hiddenTintEl = document.getElementById("hidden-tint-element");
+        const hiddenTintEnabled = document.getElementById("test-hidden-tint-enabled");
+        const hiddenTintOffset = document.getElementById("hidden-tint-offset");
+        const hiddenTintOffsetLabel = document.getElementById("hidden-tint-offset-label");
+        const hiddenTintRefresh = document.getElementById("hidden-tint-refresh-hint");
+
+        if (!hiddenTintEnabled || !hiddenTintEl) return;
+
+        const getFixedColor = () => {
+            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
+            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
+        };
+
+        const applyHiddenTint = () => {
+            if (hiddenTintEnabled.checked) {
+                hiddenTintEl.style.display = '';
+                hiddenTintEl.style.backgroundColor = getFixedColor();
+                const offset = hiddenTintOffset.value;
+                hiddenTintEl.style.bottom = offset + 'px';
+                hiddenTintOffsetLabel.textContent = `bottom: ${offset}px`;
+                hiddenTintOffset.disabled = false;
+            } else {
+                hiddenTintEl.style.display = 'none';
+                hiddenTintEl.style.backgroundColor = '';
+                hiddenTintOffset.disabled = true;
+            }
+            if (hiddenTintRefresh) hiddenTintRefresh.classList.add('visible');
+        };
+
+        hiddenTintOffset.disabled = true;
+        hiddenTintEnabled.addEventListener("change", applyHiddenTint);
+        hiddenTintOffset.addEventListener("input", applyHiddenTint);
+        document.addEventListener("fixedColorUpdated", applyHiddenTint);
+    })();
+
+    // Bypass with Transparent Parent Controls
+    (() => {
+        const bypassEl = document.getElementById("bypass-element");
+        const bypassChild = document.getElementById("bypass-child");
+        const bypassDirect = document.getElementById("test-bypass-direct");
+        const bypassTransparent = document.getElementById("test-bypass-transparent");
+        const bypassRefresh = document.getElementById("bypass-refresh-hint");
+
+        if (!bypassDirect || !bypassEl) return;
+
+        const getFixedColor = () => {
+            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
+            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
+        };
+
+        const applyBypass = () => {
+            const color = getFixedColor();
+
+            if (bypassDirect.checked) {
+                // Direct background on fixed element — Safari samples this
+                bypassEl.style.display = '';
+                bypassEl.style.backgroundColor = color;
+                bypassChild.style.backgroundColor = '';
+            } else if (bypassTransparent.checked) {
+                // Transparent parent + absolute child — Safari skips this
+                bypassEl.style.display = '';
+                bypassEl.style.backgroundColor = 'transparent';
+                bypassChild.style.backgroundColor = color;
+            } else {
+                bypassEl.style.display = 'none';
+                bypassEl.style.backgroundColor = '';
+                bypassChild.style.backgroundColor = '';
+            }
+            if (bypassRefresh) bypassRefresh.classList.add('visible');
+        };
+
+        // Mutual exclusion
+        bypassDirect.addEventListener("change", () => {
+            if (bypassDirect.checked) bypassTransparent.checked = false;
+            applyBypass();
+        });
+        bypassTransparent.addEventListener("change", () => {
+            if (bypassTransparent.checked) bypassDirect.checked = false;
+            applyBypass();
+        });
+        document.addEventListener("fixedColorUpdated", applyBypass);
+    })();
+
+    // Visibility Methods Controls
+    (() => {
+        const fixedEls = [
+            document.getElementById("fixed-top"),
+            document.getElementById("fixed-bottom"),
+        ].filter(Boolean);
+
+        const visDisplayNone = document.getElementById("test-vis-display-none");
+        const visOpacityZero = document.getElementById("test-vis-opacity-zero");
+        const visHidden = document.getElementById("test-vis-hidden");
+        const visPointerNone = document.getElementById("test-vis-pointer-none");
+        const bdOpacityEnabled = document.getElementById("test-bdopacity-enabled");
+        const visRefresh = document.getElementById("visibility-refresh-hint");
+
+        if (!visDisplayNone) return;
+
+        const showRefreshHints = () => {
+            ['fixed-refresh-hint', 'disqualifier-refresh-hint', 'visibility-refresh-hint'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('visible');
+            });
+        };
+
+        const applyVisibility = () => {
+            fixedEls.forEach(el => {
+                // Reset all visibility-related styles first
+                el.style.removeProperty('opacity');
+                el.style.removeProperty('visibility');
+                el.style.removeProperty('pointer-events');
+
+                if (visDisplayNone.checked) {
+                    el.style.display = 'none';
+                } else {
+                    // Only restore display if fixed checkbox is checked
+                    const fixedCb = document.getElementById("checkbox-fixed");
+                    if (fixedCb && fixedCb.checked) {
+                        el.style.removeProperty('display');
+                    }
+                }
+
+                if (visOpacityZero.checked) {
+                    el.style.opacity = '0';
+                }
+
+                if (visHidden.checked) {
+                    el.style.visibility = 'hidden';
+                }
+
+                if (visPointerNone.checked) {
+                    el.style.pointerEvents = 'none';
+                }
+            });
+
+            // Handle backdrop-filter: opacity(1) — prevents sampling
+            if (bdOpacityEnabled.checked) {
+                fixedEls.forEach(el => {
+                    // Combine with existing backdrop-filter if any
+                    const current = el.style.backdropFilter || '';
+                    if (!current.includes('opacity(1)')) {
+                        el.style.backdropFilter = current ? current + ' opacity(1)' : 'opacity(1)';
+                        el.style.webkitBackdropFilter = el.style.backdropFilter;
+                    }
+                });
+            }
+
+            updateURLParams();
+            updateGeneratedCode();
+        };
+
+        [visDisplayNone, visOpacityZero, visHidden, visPointerNone, bdOpacityEnabled].forEach(cb => {
+            cb.addEventListener("change", () => {
+                applyVisibility();
+                showRefreshHints();
+            });
+        });
+
+        document.addEventListener("fixedColorUpdated", applyVisibility);
+    })();
+
+    // Pseudo-Element Exclusion Controls
+    (() => {
+        const pseudoEl = document.getElementById("pseudo-element");
+        const pseudoDirect = document.getElementById("test-pseudo-direct");
+        const pseudoBefore = document.getElementById("test-pseudo-before");
+        const pseudoAfter = document.getElementById("test-pseudo-after");
+        const pseudoRefresh = document.getElementById("pseudo-refresh-hint");
+
+        if (!pseudoDirect || !pseudoEl) return;
+
+        // We need a dynamic style element for pseudo-element colors
+        const pseudoStyle = document.createElement('style');
+        pseudoStyle.id = 'pseudo-element-style';
+        document.head.appendChild(pseudoStyle);
+
+        const getFixedColor = () => {
+            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
+            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
+        };
+
+        const applyPseudo = () => {
+            const color = getFixedColor();
+
+            // Reset classes
+            pseudoEl.classList.remove('use-before', 'use-after');
+            pseudoEl.style.backgroundColor = '';
+            pseudoStyle.textContent = '';
+
+            if (pseudoDirect.checked) {
+                pseudoEl.style.display = '';
+                pseudoEl.style.backgroundColor = color;
+            } else if (pseudoBefore.checked) {
+                pseudoEl.style.display = '';
+                pseudoEl.classList.add('use-before');
+                pseudoStyle.textContent = `#pseudo-element.use-before::before { background-color: ${color}; }`;
+            } else if (pseudoAfter.checked) {
+                pseudoEl.style.display = '';
+                pseudoEl.classList.add('use-after');
+                pseudoStyle.textContent = `#pseudo-element.use-after::after { background-color: ${color}; }`;
+            } else {
+                pseudoEl.style.display = 'none';
+            }
+            if (pseudoRefresh) pseudoRefresh.classList.add('visible');
+        };
+
+        // Mutual exclusion
+        pseudoDirect.addEventListener("change", () => {
+            if (pseudoDirect.checked) {
+                pseudoBefore.checked = false;
+                pseudoAfter.checked = false;
+            }
+            applyPseudo();
+        });
+        pseudoBefore.addEventListener("change", () => {
+            if (pseudoBefore.checked) {
+                pseudoDirect.checked = false;
+                pseudoAfter.checked = false;
+            }
+            applyPseudo();
+        });
+        pseudoAfter.addEventListener("change", () => {
+            if (pseudoAfter.checked) {
+                pseudoDirect.checked = false;
+                pseudoBefore.checked = false;
+            }
+            applyPseudo();
+        });
+        document.addEventListener("fixedColorUpdated", applyPseudo);
     })();
 
     // Safari Version Check
