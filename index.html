@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://safari-color-tinting.pages.dev" />
 <meta property="og:site_name" content="Andrew Escobar: notes" />
 <meta property="og:type" content="website" />
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=100">
 <meta name="theme-color" content="#FDFAE0">
 </head>
 
@@ -31,8 +31,9 @@
     <div id="fixed-top"></div>
     <div id="fixed-bottom"></div>
     <div id="hidden-tint-element"></div>
-    <div id="bypass-element"><div id="bypass-child"></div></div>
-    <div id="pseudo-element"></div>
+    <div id="bypass-top"><div id="bypass-top-child"></div></div>
+    <div id="bypass-bottom"><div id="bypass-bottom-child"></div></div>
+
 
 <h1><a href="/">Safari Color Tinting: Demo</a></h1>
 
@@ -100,6 +101,19 @@
                 <input type="checkbox" id="test-blur-enabled">
                 <code class="disqualifier-code">blur(0px)</code>
             </label>
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bdopacity-enabled">
+                <code class="disqualifier-code">opacity(1)</code>
+            </label>
+        </div>
+
+        <p class="disqualifier-desc">Use a <code class="disqualifier-code">background-color: transparent</code> parent element to prevent Safari from sampling its <code class="disqualifier-code">position: absolute</code> child element.</p>
+
+        <div class="disqualifier-checkboxes">
+            <label class="disqualifier-label">
+                <input type="checkbox" id="test-bypass-transparent">
+                transparent parent + absolute child
+            </label>
         </div>
         <a id="disqualifier-refresh-hint" class="refresh-hint" href="">↻ reload</a>
 
@@ -115,6 +129,14 @@
                 <input type="checkbox" id="test-hidden-tint-enabled">
                 Enable hidden tinting element
             </label>
+            <label class="disqualifier-label">
+                <input type="radio" name="hidden-tint-edge" id="hidden-tint-edge-bottom" checked>
+                <code class="disqualifier-code">bottom</code> (chin)
+            </label>
+            <label class="disqualifier-label">
+                <input type="radio" name="hidden-tint-edge" id="hidden-tint-edge-top">
+                <code class="disqualifier-code">top</code> (forehead)
+            </label>
         </div>
         <div class="disqualifier-row" id="hidden-tint-offset-row">
             <code class="disqualifier-code" id="hidden-tint-offset-label">bottom: -8px</code>
@@ -123,80 +145,38 @@
         <a id="hidden-tint-refresh-hint" class="refresh-hint" href="">↻ reload</a>
     </div>
 
-<!-- bypass with transparent parent card -->
-    <div class="card-container disqualifier-test">
-        <h4>Bypass with Transparent Parent</h4>
-        <p class="disqualifier-desc">A fixed element with <code class="disqualifier-code">background-color: transparent</code> is invisible to Safari's algorithm. An <code class="disqualifier-code">position: absolute</code> child carries the visual styling, but Safari skips absolute children &mdash; so the toolbar tint falls through to the body background.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bypass-direct">
-                Direct background on fixed element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bypass-transparent">
-                Transparent parent + absolute child
-            </label>
-        </div>
-        <a id="bypass-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
-
 <!-- visibility methods card -->
     <div class="card-container disqualifier-test">
         <h4>Visibility Methods</h4>
-        <p class="disqualifier-desc">Which CSS visibility methods prevent Safari from sampling a fixed element? Only <code class="disqualifier-code">display: none</code> is reliable. The others still get sampled.</p>
+        <p class="disqualifier-desc">Which CSS visibility methods prevent Safari from sampling a fixed element?</p>
 
+        <p class="disqualifier-desc"><strong>NOT SAMPLED:</strong></p>
         <div class="disqualifier-checkboxes">
             <label class="disqualifier-label">
                 <input type="checkbox" id="test-vis-display-none">
                 <code class="disqualifier-code">display: none</code>
-                <span class="disqualifier-badge badge-prevents">prevents</span>
             </label>
+        </div>
+
+        <p class="disqualifier-desc"><strong>STILL SAMPLED:</strong></p>
+        <div class="disqualifier-checkboxes">
             <label class="disqualifier-label">
                 <input type="checkbox" id="test-vis-opacity-zero">
                 <code class="disqualifier-code">opacity: 0</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
             </label>
             <label class="disqualifier-label">
                 <input type="checkbox" id="test-vis-hidden">
                 <code class="disqualifier-code">visibility: hidden</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
             </label>
             <label class="disqualifier-label">
                 <input type="checkbox" id="test-vis-pointer-none">
                 <code class="disqualifier-code">pointer-events: none</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bdopacity-enabled">
-                <code class="disqualifier-code">backdrop-filter: opacity(1)</code>
-                <span class="disqualifier-badge badge-prevents">prevents</span>
             </label>
         </div>
         <a id="visibility-refresh-hint" class="refresh-hint" href="">↻ reload</a>
     </div>
 
-<!-- pseudo-element exclusion card -->
-    <div class="card-container disqualifier-test">
-        <h4>Pseudo-Element Exclusion</h4>
-        <p class="disqualifier-desc"><code class="disqualifier-code">::before</code> and <code class="disqualifier-code">::after</code> pseudo-elements on fixed-position elements are NOT sampled by Safari's tinting algorithm. The background color from a pseudo-element is ignored.</p>
 
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-direct">
-                Direct background on fixed element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-before">
-                Background via <code class="disqualifier-code">::before</code> pseudo-element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-after">
-                Background via <code class="disqualifier-code">::after</code> pseudo-element
-            </label>
-        </div>
-        <a id="pseudo-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
 
 <!-- fifth card-container for Safari How To -->
     <div class="card-container safari-settings">
@@ -206,8 +186,8 @@
         <b>iOS</b>: Setting › Apps › Safari › <nobr>Tabs: Allow Website Tinting ✓</nobr>
     </div>
 
-<script src="luma.js?v=13"></script>
-<script src="script.js?v=13"></script>
+<script src="luma.js?v=100"></script>
+<script src="script.js?v=100"></script>
 
 <footer>
     <p><a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a><br /><br />&copy; 2025 Andrew Escobar</p>

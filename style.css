@@ -516,18 +516,16 @@ footer a {
 #hidden-tint-element {
     display: none;
     position: fixed;
-    bottom: -8px;
     left: 0;
     width: 90%;
     min-height: 12px;
     z-index: 1000;
 }
 
-/* Bypass transparent parent element */
-#bypass-element {
+/* Bypass transparent parent elements */
+#bypass-top, #bypass-bottom {
     display: none;
     position: fixed;
-    top: 4px;
     left: 0;
     width: 90%;
     min-height: 15px;
@@ -535,7 +533,10 @@ footer a {
     background-color: transparent;
 }
 
-#bypass-child {
+#bypass-top { top: 4px; }
+#bypass-bottom { bottom: 3px; }
+
+#bypass-top-child, #bypass-bottom-child {
     position: absolute;
     top: 0;
     left: 0;
@@ -543,32 +544,4 @@ footer a {
     height: 100%;
 }
 
-/* Pseudo-element test */
-#pseudo-element {
-    display: none;
-    position: fixed;
-    top: 4px;
-    left: 0;
-    width: 90%;
-    min-height: 15px;
-    z-index: 1000;
-}
-
-#pseudo-element.use-before::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-#pseudo-element.use-after::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
 
