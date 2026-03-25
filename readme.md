@@ -18,40 +18,13 @@ Safari versions 15 through 18.6 supported a <nobr><code>theme-color</code></nobr
 ```
 > While Safari 26+ still parses the <nobr><code>theme-color</code></nobr> meta tag, [Safari no longer uses this color][caniuse].
 
-## Safari 26+: `{position: fixed;}` or `<body>`
+## Safari 26+: `<body>` or `{position: fixed | sticky;}`
 
 Safari 26 now derives browser UI colors automatically:
 
-### `{position: fixed;}`
-
-Safari 26 will first use the <nobr><code>background-color</code></nobr> of elements fixed to the top or bottom of the page.
-
-Safari will only use an element that is:
-
-* within 4 pixels from the top **or** 3 pixels from the bottom on iOS;
-* at least 80% wide on iOS **or** 90% wide on macOS; and
-* at least 3 pixels high.
-
-```html
-<div style="position: fixed; top: 4px; width: 90%; background-color: #FF7700;">
-```
-
-```css
-div { position: fixed; bottom: 3px; width: 90%; background-color: #FF7700; }
-```
-
-To prevent Safari from sampling the `background-color` of a fixed element (like a temporary banner or alert) add a neutral `backdrop-filter`:
-
-Safari does not re-sample fixed-position elements; subsequent DOM or style changes do not update the color of Safari UI.
-
-
-```css
-div { backdrop-filter`: `saturate(100%)` `blur(0px)` `opacity(1) }
-```
-
 ### `<body>`
 
-Safari 26 will then use the <nobr><code>background-color</code></nobr> of the `<body>` element if there are no suitable fixed elements.
+Safari 26 uses the <nobr><code>background-color</code></nobr> of the `<body>` element as the default source for browser UI color.
 
 ```html
 <body style="background-color: #0088FF;">
@@ -62,6 +35,47 @@ body { background-color: #0088FF; }
 ```
 
 Safari re-samples `body` as needed. WebKit has a live observer that directly updates the the color of Safari UI as it changes.
+
+If no `<body>` background-color is set, Safari falls back to the `<html>` element's background-color. If neither is set, Safari defaults to white in light mode and black in dark mode.
+
+> [!NOTE]
+> `viewport-fit=cover` in the viewport meta tag is required for controlling the bottom bar tint and for `env(safe-area-inset-*)` CSS environment variables to work, particularly for home-screen web apps.
+
+### `{position: fixed | sticky;}`
+
+If a qualifying `fixed` or `sticky` element exists with a <nobr><code>background-color</code></nobr>, it takes priority over `<body>`. Safari will sample an element that is:
+
+* within 4 pixels from the top **`OR`**
+* 3 pixels from the bottom on iOS **`OR`**
+* partially off-screen (up to `bottom: -8px` with `min-height: 12px` still sampled)
+
+- at least 80% wide on iOS **`OR`**
+- at least 90% wide on macOS
+
+* at least 3 pixels high
+
+```html
+<div style="position: fixed; top: 4px; width: 90%; background-color: #F70;">
+```
+```css
+div { position: sticky; top: 0; width: 90%; background-color: #F70; }
+```
+
+### Sampling Details
+
+Safari tinting has several edge cases: elements that are not sampled, properties that prevent sampling, and properties that still result in sampling.
+
+#### NOT SAMPLED:
+
+* `position: absolute` children inside fixed or sticky parents
+*  pseudo-elements `::before` `::after` on fixed or sticky elements
+* `display: none`
+* `backdrop-filter`: `opacity: 0.9` `saturate(50%)` `blur(8px)`
+
+#### SAMPLED:
+
+* `visibility: hidden`
+* `pointer-events: none`
 
 ## [**Luma: Apple & Perceived Brightness**][luma]
 
