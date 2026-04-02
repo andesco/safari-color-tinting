@@ -6,7 +6,7 @@ Apple has quietly abandoned support for using `<meta name="theme-color">` to set
 
 View how your web browser supports color in its UI:
 
-### [Safari Color Tinting: Demo](http://safari-color-tinting.pages.dev "Safari Color Tinting: Demo")
+### [Safari Color Tinting: Demo](https://safari-color-tinting.pages.dev "Safari Color Tinting: Demo")
 
 ## Safari 15+: `<meta>`
 Safari versions 15 through 18.6 supported a <nobr><code>theme-color</code></nobr> meta tag, allowing developers to directly declare the color of browser UI elements.
@@ -45,14 +45,14 @@ If no `<body>` background-color is set, Safari falls back to the `<html>` elemen
 
 If a qualifying `fixed` or `sticky` element exists with a <nobr><code>background-color</code></nobr>, it takes priority over `<body>`. Safari will sample an element that is:
 
-* within 4 pixels from the top **`OR`**
-* 3 pixels from the bottom on iOS **`OR`**
-* partially off-screen (up to `bottom: -8px` with `min-height: 12px` still sampled)
+* at least 4 pixels high
 
 - at least 80% wide on iOS **`OR`**
 - at least 90% wide on macOS
 
-* at least 3 pixels high
+* within 4 pixels from the top **`OR`**
+* 3 pixels from the bottom on iOS **`OR`**
+* partially off-screen with at least 4px visible (example: `bottom: -100px` `min-height: 104px`)
 
 ```html
 <div style="position: fixed; top: 4px; width: 90%; background-color: #F70;">
