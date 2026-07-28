@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="only light">
+    <title>HDR Glow: Abusing Brightness in Advertising</title>
+    <style>
+      :root {
+        color-scheme: only light;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: color(srgb 1 1 1);
+        color: #0a2540;
+      }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 2rem;
+        box-sizing: border-box;
+        background: color(srgb 1 1 1);
+      }
+      .ad {
+        width: min(100%, 42rem);
+        box-sizing: border-box;
+        padding: 2rem;
+        border-radius: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #1877be url("hdr-glow.avif") center / cover no-repeat;
+        color: #0a2540;
+      }
+      h1 { margin: 0; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; }
+      p { max-width: 34rem; margin: .8rem 0 1.5rem; font-size: 1.1rem; line-height: 1.5; }
+      a { color: inherit; font-weight: 700; }
+      .docs-link { color: #0a2540; }
+    </style>
+  </head>
+  <body>
+    <article class="ad">
+      <h1>Example Ad Title</h1>
+      <p>This demo compares two white colors. The <a href="https://www.w3.org/TR/css-color-hdr-1/#rec2100-pq">PQ-encoded HDR image</a> uses <code>color(rec2100-pq .75 .75 .75)</code>. The page background uses <a href="https://www.w3.org/TR/css-color-hdr-1/#hdr-reference-white">reference white</a>, <code>color(srgb 1 1 1)</code>. On a compatible HDR display and browser, the image is significantly brighter than the page background.</p>
+    </article>
+    <a class="docs-link" href="https://github.com/andesco/safari-color-tinting/blob/main/hdr-glow/README.md">Read the documentation on GitHub</a>
+  </body>
+</html>
