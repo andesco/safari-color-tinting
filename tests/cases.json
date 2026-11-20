@@ -1,0 +1,565 @@
+{
+  "description": "Expected Safari tint for each test page, measured in the iOS Simulator (iOS 26.4 and 27.2, iPhone, 402px wide). Colors (tests.css): page = --page-color, bar = --bar-color, second = --second-color, scrim-light/scrim-dark = the scrim color mixed over the page color. appearance = the device's light or dark mode for the case.",
+  "cases": [
+    {
+      "id": "height-1",
+      "url": "edge.html?h=1",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-2",
+      "url": "edge.html?h=2",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-3",
+      "url": "edge.html?h=3",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-4",
+      "url": "edge.html?h=4",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-5",
+      "url": "edge.html?h=5",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-6",
+      "url": "edge.html?h=6",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen; pixel sampling"
+    },
+    {
+      "id": "height-7",
+      "url": "edge.html?h=7",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen; pixel sampling"
+    },
+    {
+      "id": "height-8",
+      "url": "edge.html?h=8",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen; pixel sampling"
+    },
+    {
+      "id": "height-9",
+      "url": "edge.html?h=9",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen; pixel sampling"
+    },
+    {
+      "id": "height-10",
+      "url": "edge.html?h=10",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen; pixel sampling"
+    },
+    {
+      "id": "height-11",
+      "url": "edge.html?h=11",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "height-12",
+      "url": "edge.html?h=12",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "fully on screen"
+    },
+    {
+      "id": "visible-0",
+      "url": "edge.html?h=12&v=0",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-1",
+      "url": "edge.html?h=12&v=1",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-2",
+      "url": "edge.html?h=12&v=2",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-3",
+      "url": "edge.html?h=12&v=3",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-4",
+      "url": "edge.html?h=12&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "bar"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-5",
+      "url": "edge.html?h=12&v=5",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "visible-6",
+      "url": "edge.html?h=12&v=6",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "12px bar pushed past the edge"
+    },
+    {
+      "id": "height-8-visible-4",
+      "url": "edge.html?h=8&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "height-8-visible-5",
+      "url": "edge.html?h=8&v=5",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "height-10-visible-4",
+      "url": "edge.html?h=10&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "height-10-visible-5",
+      "url": "edge.html?h=10&v=5",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "height-11-visible-4",
+      "url": "edge.html?h=11&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "height-11-visible-5",
+      "url": "edge.html?h=11&v=5",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "height-20-visible-4",
+      "url": "edge.html?h=20&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "height-20-visible-5",
+      "url": "edge.html?h=20&v=5",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "height-40-visible-4",
+      "url": "edge.html?h=40&v=4",
+      "expected": {
+        "top": "page",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "width-95",
+      "url": "edge.html?h=12&v=5&w=95",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "12px bar, 5px on screen"
+    },
+    {
+      "id": "width-90",
+      "url": "edge.html?h=12&v=5&w=90",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      },
+      "note": "12px bar, 5px on screen"
+    },
+    {
+      "id": "width-88",
+      "url": "edge.html?h=12&v=5&w=88",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar, 5px on screen"
+    },
+    {
+      "id": "width-85",
+      "url": "edge.html?h=12&v=5&w=85",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar, 5px on screen"
+    },
+    {
+      "id": "width-80",
+      "url": "edge.html?h=12&v=5&w=80",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "12px bar, 5px on screen"
+    },
+    {
+      "id": "none",
+      "url": "element.html?test=none",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "direct",
+      "url": "element.html?test=direct",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "child",
+      "url": "element.html?test=child",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "child-no-background",
+      "url": "element.html?test=child-no-background",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "child-partial",
+      "url": "element.html?test=child-partial",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "child-behind",
+      "url": "element.html?test=child-behind",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "colored-parent-child",
+      "url": "element.html?test=colored-parent-child",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "zero-height-parent",
+      "url": "element.html?test=zero-height-parent",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "before",
+      "url": "element.html?test=before",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "after",
+      "url": "element.html?test=after",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "before-partial",
+      "url": "element.html?test=before-partial",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "colored-element-before",
+      "url": "element.html?test=colored-element-before",
+      "expected": {
+        "top": "second",
+        "bottom": "second"
+      }
+    },
+    {
+      "id": "backdrop-saturate",
+      "url": "element.html?test=backdrop-saturate",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "backdrop-blur",
+      "url": "element.html?test=backdrop-blur",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "backdrop-opacity",
+      "url": "element.html?test=backdrop-opacity",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "opacity-0",
+      "url": "element.html?test=opacity-0",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "visibility-hidden",
+      "url": "element.html?test=visibility-hidden",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "display-none",
+      "url": "element.html?test=display-none",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      }
+    },
+    {
+      "id": "pointer-events-none",
+      "url": "element.html?test=pointer-events-none",
+      "expected": {
+        "top": "bar",
+        "bottom": "bar"
+      }
+    },
+    {
+      "id": "scrim-light-edges",
+      "url": "scrim.html?edges=1",
+      "appearance": "light",
+      "expected": {
+        "top": "scrim-light",
+        "bottom": "scrim-light"
+      },
+      "note": "dialog, scrim and edge strips"
+    },
+    {
+      "id": "scrim-light-no-edges",
+      "url": "scrim.html?edges=0",
+      "appearance": "light",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "dialog and scrim, no edge strips"
+    },
+    {
+      "id": "demo-scrim-light",
+      "url": "../scrim.html?open=dialog",
+      "appearance": "light",
+      "expected": {
+        "top": "scrim-demo",
+        "bottom": "scrim-demo"
+      },
+      "note": "Scrim page: dialog"
+    },
+    {
+      "id": "demo-scrim-dialog-no-edges-light",
+      "url": "../scrim.html?open=dialog&edges=0",
+      "appearance": "light",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "Scrim page: dialog, no strips"
+    },
+    {
+      "id": "demo-scrim-sheet-light",
+      "url": "../scrim.html?open=sheet",
+      "appearance": "light",
+      "expected": {
+        "top": "scrim-demo",
+        "bottom": "sheet"
+      },
+      "note": "Scrim page: sheet, top strip"
+    },
+    {
+      "id": "demo-scrim-sheet-no-edges-light",
+      "url": "../scrim.html?open=sheet&edges=0",
+      "appearance": "light",
+      "expected": {
+        "top": "page",
+        "bottom": "sheet"
+      },
+      "note": "Scrim page: sheet, no strip"
+    },
+    {
+      "id": "scrim-dark-edges",
+      "url": "scrim.html?edges=1",
+      "appearance": "dark",
+      "expected": {
+        "top": "scrim-dark",
+        "bottom": "scrim-dark"
+      },
+      "note": "dialog, scrim and edge strips"
+    },
+    {
+      "id": "scrim-dark-no-edges",
+      "url": "scrim.html?edges=0",
+      "appearance": "dark",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "dialog and scrim, no edge strips"
+    },
+    {
+      "id": "demo-scrim-dark",
+      "url": "../scrim.html?open=dialog",
+      "appearance": "dark",
+      "expected": {
+        "top": "scrim-demo",
+        "bottom": "scrim-demo"
+      },
+      "note": "Scrim page: dialog"
+    },
+    {
+      "id": "demo-scrim-dialog-no-edges-dark",
+      "url": "../scrim.html?open=dialog&edges=0",
+      "appearance": "dark",
+      "expected": {
+        "top": "page",
+        "bottom": "page"
+      },
+      "note": "Scrim page: dialog, no strips"
+    },
+    {
+      "id": "demo-scrim-sheet-dark",
+      "url": "../scrim.html?open=sheet",
+      "appearance": "dark",
+      "expected": {
+        "top": "scrim-demo",
+        "bottom": "sheet"
+      },
+      "note": "Scrim page: sheet, top strip"
+    },
+    {
+      "id": "demo-scrim-sheet-no-edges-dark",
+      "url": "../scrim.html?open=sheet&edges=0",
+      "appearance": "dark",
+      "expected": {
+        "top": "page",
+        "bottom": "sheet"
+      },
+      "note": "Scrim page: sheet, no strip"
+    }
+  ]
+}

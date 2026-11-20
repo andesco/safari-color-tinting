@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tint Tests</title>
+<link rel="stylesheet" href="tests.css">
+<style>
+  main { place-content: start center; padding-top: 2rem; }
+  table { border-collapse: collapse; font-size: 0.85rem; max-width: 40rem; }
+  th, td { text-align: left; padding: 0.35rem 0.6rem; border-bottom: 1px solid color-mix(in srgb, var(--text-color) 25%, transparent); vertical-align: top; }
+  th { font-weight: 600; }
+  a { color: inherit; }
+  .swatch { display: inline-block; width: 0.9em; height: 0.9em; border-radius: 0.2em; vertical-align: -0.1em; margin-right: 0.35em; border: 1px solid color-mix(in srgb, var(--text-color) 40%, transparent); }
+  p { margin: 0; max-width: 40rem; line-height: 1.45; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Safari Color Tinting: Tests</h1>
+  <p>Each page puts a bar at the top and the bottom edge. The table shows the color Safari uses for the status bar (top) and the toolbar area (bottom), measured in the iOS Simulator. <code>run.py</code> repeats the measurement.</p>
+  <table>
+    <thead><tr><th>Test</th><th>Top</th><th>Bottom</th></tr></thead>
+    <tbody id="cases"></tbody>
+  </table>
+</main>
+<script src="../luma.js"></script>
+<script src="tests.js"></script>
+<script>
+applyTextColors();
+const scrimOver = (mode) => `color-mix(in srgb, var(--scrim-${mode}-color) var(--scrim-${mode}-opacity), var(--page-color))`;
+const swatch = {
+    page: 'var(--page-color)', bar: 'var(--bar-color)', second: 'var(--second-color)',
+    'scrim-light': scrimOver('light'), 'scrim-dark': scrimOver('dark'),
+    'scrim-demo': 'color-mix(in srgb, var(--demo-scrim-color) var(--demo-scrim-opacity), var(--page-color))', sheet: 'var(--sheet-color)',
+};
+const cell = (expected) => `<td><span class="swatch" style="background: ${swatch[expected]}"></span>${expected}</td>`;
+fetch('cases.json').then((r) => r.json()).then(({ cases }) => {
+    document.getElementById('cases').innerHTML = cases.map((c) =>
+        `<tr><td><a href="${c.url}">${c.id}</a>${c.note || c.appearance ? `<br><small>${[c.appearance && `${c.appearance} appearance`, c.note].filter(Boolean).join('; ')}</small>` : ''}</td>${cell(c.expected.top)}${cell(c.expected.bottom)}</tr>`
+    ).join('');
+});
+</script>
+</body>
+</html>

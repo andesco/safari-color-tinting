@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edge Test</title>
+<link rel="stylesheet" href="tests.css">
+</head>
+<body>
+<main></main>
+<script src="../luma.js"></script>
+<script src="tests.js"></script>
+<script>
+// edge.html?h=<height px>&v=<px on screen, default h>&w=<width %, default 100>&e=<tb|t|b>
+// A bar at the top and/or bottom edge, pushed past the edge so v px stay on screen.
+const p = new URLSearchParams(location.search);
+const h = Number(p.get('h') ?? 12), v = Number(p.get('v') ?? h), w = Number(p.get('w') ?? 100);
+const edges = p.get('e') ?? 'tb';
+const offset = v - h;
+const rules = [`.bar { position: fixed; left: 0; width: ${w}%; height: ${h}px; background-color: var(--bar-color); }`];
+const html = [];
+if (edges.includes('t')) { rules.push(`#top-bar { top: ${offset}px; }`); html.push('<div id="top-bar" class="bar"></div>'); }
+if (edges.includes('b')) { rules.push(`#bottom-bar { bottom: ${offset}px; }`); html.push('<div id="bottom-bar" class="bar"></div>'); }
+runSample(`${h}px tall, ${v}px on screen, ${w}% wide`, { css: rules.join('\n'), html: html.join('\n') });
+</script>
+</body>
+</html>

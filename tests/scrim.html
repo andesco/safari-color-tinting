@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrim Test</title>
+<link rel="stylesheet" href="tests.css">
+<style>
+  /* The scrim follows the device appearance */
+  :root {
+    --scrim-color: var(--scrim-light-color);
+    --scrim-opacity: var(--scrim-light-opacity);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --scrim-color: var(--scrim-dark-color);
+      --scrim-opacity: var(--scrim-dark-opacity);
+    }
+  }
+</style>
+</head>
+<body>
+<main></main>
+<script src="../luma.js"></script>
+<script src="tests.js"></script>
+<script>
+// scrim.html?edges=1 (default) or ?edges=0. Opens a dialog over a blurred
+// scrim on load, with or without a strip at each edge.
+const edges = new URLSearchParams(location.search).get('edges') !== '0';
+const css = `.scrim {
+  position: fixed; inset: 0;
+  background-color: color-mix(in srgb, var(--scrim-color) var(--scrim-opacity), transparent);
+  backdrop-filter: blur(8px);
+}
+.dialog {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 240px; height: 160px; border-radius: 24px; background-color: white;
+}${edges ? `
+/* Solid strips at the edges, in the color of the scrim over the page */
+.scrim-edge {
+  position: fixed; left: 0; width: 100%; height: 12px;
+  background-color: color-mix(in srgb, var(--scrim-color) var(--scrim-opacity), var(--page-color));
+}
+.scrim-edge.top { top: -7px; }
+.scrim-edge.bottom { bottom: -8px; }` : ''}`;
+const html = `<div class="scrim"></div>${edges ? '\n<div class="scrim-edge top"></div>\n<div class="scrim-edge bottom"></div>' : ''}\n<div class="dialog"></div>`;
+runSample(edges ? 'Dialog with strips at the edges' : 'Dialog without strips', { css, html });
+</script>
+</body>
+</html>

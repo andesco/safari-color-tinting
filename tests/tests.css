@@ -1,0 +1,61 @@
+/* Safari color tinting test pages. Colors are variables. These are the
+   defaults of the demo page; the pages use the colors saved on the demo page
+   instead (tests.js). run.py reads the defaults from here. */
+:root {
+    --page-color: #0088ff;   /* body background (demo: Body Background) */
+    --bar-color: #ffcc33;    /* the color under test (demo: Fixed Position Background) */
+    --second-color: #363636; /* a second color, e.g. a colored parent (demo: Meta Theme Color) */
+
+    /* Scrim, as in the original example
+       (gist.github.com/caelinsutch/4a484b1754344e330290eb364d6f008a) */
+    --scrim-light-color: #1c398e; /* blue-900 */
+    --scrim-light-opacity: 10%;
+    --scrim-dark-color: #000000;
+    --scrim-dark-opacity: 85%;
+    /* Scrim page: black at 20%, white sheet */
+    --demo-scrim-color: #000000;
+    --demo-scrim-opacity: 20%;
+    --sheet-color: #ffffff;
+}
+
+html, body {
+    margin: 0;
+    background-color: var(--page-color);
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* Text and code colors follow the luma of --page-color (set by tests.js) */
+body { color: var(--text-color, #fff); }
+
+main {
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    place-content: center;
+    gap: 0.75rem;
+    padding: 4rem 1rem;
+}
+
+main h1 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+
+pre.sample {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.6rem;
+    background: var(--code-background, rgba(0, 0, 0, 0.2));
+    color: var(--text-color, #fff);
+    font: 0.8rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-width: 36rem;
+}
+
+pre.sample .label {
+    display: block;
+    opacity: 0.6;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+}

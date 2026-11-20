@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Element Test</title>
+<link rel="stylesheet" href="tests.css">
+</head>
+<body>
+<main></main>
+<script src="../luma.js"></script>
+<script src="tests.js"></script>
+<script>
+// element.html?test=<name>. Each test builds the same full-width, 44px bar at
+// the top and the bottom edge, then changes one thing about it.
+const base = `.bar { position: fixed; left: 0; width: 100%; height: 44px; }
+#top-bar { top: 0; }
+#bottom-bar { bottom: 0; }`;
+const fill = 'position: absolute; top: 0; bottom: 0; left: 0;';
+
+const TESTS = {
+    'none':                   ['No bar', '', null],
+    'direct':                 ['Bar with a background color', '.bar { background-color: var(--bar-color); }'],
+    'child':                  ['Transparent parent, absolute child', `.bar { background-color: transparent; }\n.child { ${fill} right: 0; background-color: var(--bar-color); }`, '<div class="child"></div>'],
+    'child-no-background':    ['Parent with no background, absolute child', `.child { ${fill} right: 0; background-color: var(--bar-color); }`, '<div class="child"></div>'],
+    'child-partial':          ['Absolute child covers only the left 30%', `.bar { background-color: transparent; }\n.child { ${fill} width: 30%; background-color: var(--bar-color); }`, '<div class="child"></div>'],
+    'child-behind':           ['Absolute child with z-index: -1', `.bar { background-color: transparent; }\n.child { ${fill} right: 0; z-index: -1; background-color: var(--bar-color); }`, '<div class="child"></div>'],
+    'colored-parent-child':   ['Colored parent, absolute child', `.bar { background-color: var(--second-color); }\n.child { ${fill} right: 0; background-color: var(--bar-color); }`, '<div class="child"></div>'],
+    'zero-height-parent':     ['Parent 0px tall, absolute child 44px tall', `.bar { height: 0; }\n.child { position: absolute; left: 0; right: 0; height: 44px; background-color: var(--bar-color); }\n#top-bar .child { top: 0; }\n#bottom-bar .child { bottom: 0; }`, '<div class="child"></div>'],
+    'before':                 ['Transparent element, ::before', `.bar { background-color: transparent; }\n.bar::before { content: ""; ${fill} right: 0; background-color: var(--bar-color); }`],
+    'after':                  ['Transparent element, ::after', `.bar { background-color: transparent; }\n.bar::after { content: ""; ${fill} right: 0; background-color: var(--bar-color); }`],
+    'before-partial':         ['::before covers only the left 30%', `.bar { background-color: transparent; }\n.bar::before { content: ""; ${fill} width: 30%; background-color: var(--bar-color); }`],
+    'colored-element-before': ['Colored element, ::before', `.bar { background-color: var(--second-color); }\n.bar::before { content: ""; ${fill} right: 0; background-color: var(--bar-color); }`],
+    'backdrop-saturate':      ['backdrop-filter: saturate(100%)', '.bar { background-color: var(--bar-color); backdrop-filter: saturate(100%); }'],
+    'backdrop-blur':          ['backdrop-filter: blur(0px)', '.bar { background-color: var(--bar-color); backdrop-filter: blur(0px); }'],
+    'backdrop-opacity':       ['backdrop-filter: opacity(1)', '.bar { background-color: var(--bar-color); backdrop-filter: opacity(1); }'],
+    'opacity-0':              ['opacity: 0', '.bar { background-color: var(--bar-color); opacity: 0; }'],
+    'visibility-hidden':      ['visibility: hidden', '.bar { background-color: var(--bar-color); visibility: hidden; }'],
+    'display-none':           ['display: none', '.bar { background-color: var(--bar-color); display: none; }'],
+    'pointer-events-none':    ['pointer-events: none', '.bar { background-color: var(--bar-color); pointer-events: none; }'],
+};
+
+const name = new URLSearchParams(location.search).get('test') || 'direct';
+const [title, extra, inner = ''] = TESTS[name] || ['Unknown test', '', null];
+const bars = inner === null ? '' : ['top-bar', 'bottom-bar'].map((id) => `<div id="${id}" class="bar">${inner}</div>`).join('\n');
+runSample(title, { css: inner === null ? '' : `${base}\n${extra}`, html: bars });
+</script>
+</body>
+</html>
