@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://safari-color-tinting.pages.dev" />
 <meta property="og:site_name" content="Andrew Escobar: notes" />
 <meta property="og:type" content="website" />
-<link rel="stylesheet" href="style.css?v=58">
+<link rel="stylesheet" href="style.css?v=64">
 </head>
 
 <body style="background-color: #0088FF;">
@@ -81,11 +81,9 @@
 </div>
 <!-- end .cards-flex-wrapper -->
 
-<!-- intro -->
-    <p class="intro">Safari tints its user interface to match the background color or a fixed element at the top or bottom edge. Learn more: <a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a></p>
-
-<!-- Safari settings help -->
+<!-- intro and Safari settings -->
     <div class="card-container safari-settings">
+        <p>Safari tints its user interface to match the background color or a fixed element at the top or bottom edge. Learn more: <a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a></p>
         <p>Users can enable or disable browser UI color tinting in Safari 26:<br /><br />
         <b>macOS</b>: Safari › Settings › Tabs › Appearance: ✓ Show color in tab bar
         <br /><br />
@@ -96,19 +94,19 @@
 <!-- fixed element without tint -->
     <div class="card-container test-card">
         <h4>Fixed Element Without Tinting</h4>
-        <p class="card-desc">A neutral <code class="inline-code">backdrop-filter</code> stops Safari from sampling the background color.</p>
+        <p class="card-desc">Safari does not sample a fixed element with a neutral <code class="inline-code">backdrop-filter</code>:</p>
         <div class="test-options">
             <label class="option-label test-option">
                 <input type="checkbox" data-group="technique" value="saturate">
-                <code class="inline-code">backdrop-filter: saturate(100%)</code>
+                <code class="inline-code">saturate(100%)</code>
             </label>
             <label class="option-label test-option">
                 <input type="checkbox" data-group="technique" value="blur">
-                <code class="inline-code">backdrop-filter: blur(0px)</code>
+                <code class="inline-code">blur(0px)</code>
             </label>
             <label class="option-label test-option">
                 <input type="checkbox" data-group="technique" value="opacity">
-                <code class="inline-code">backdrop-filter: opacity(1)</code>
+                <code class="inline-code">opacity(1)</code>
             </label>
         </div>
     </div>
@@ -149,7 +147,7 @@
             </label>
             <label class="option-label test-option">
                 <input type="checkbox" data-group="hide" value="offscreen">
-                Both bars off screen: 0px
+                Move both bars off screen: 0px on screen
             </label>
             <pre class="option-code"><code class="nohighlight">#top-bar { position: fixed; top: -12px; left: 0; width: 100%; height: 12px; }
 #bottom-bar { position: fixed; bottom: -12px; left: 0; width: 100%; height: 12px; }</code></pre>
@@ -165,9 +163,9 @@
 
 <!-- scrim -->
     <div class="card-container test-card">
-        <h4>Scrim</h4>
+        <h4>Blending Tinting and Page Blurs</h4>
         <p class="card-desc">A sheet or a dialog dims the page with a translucent scrim. Safari ignores the scrim. How to make the status bar and the toolbar match it:</p>
-        <a class="page-button" href="scrim.html">Open Scrim</a>
+        <a class="page-button" href="scrim.html">Open Blending Tinting and Page Blurs</a>
     </div>
 
 <!-- generated code -->

@@ -41,7 +41,7 @@ body.light-theme {
     flex-wrap: wrap;
     justify-content: center;
     gap: 1.25rem;
-    margin: 1.25rem auto;
+    margin: 1.25rem auto 3rem; /* space below the color pickers */
     max-width: 920px;
     width: 90%;
 }
@@ -70,7 +70,7 @@ body.light-theme {
     margin-top: 1.25rem;
     font-size: 1.125rem;
     margin-bottom: 1em;
-    font-weight: normal;
+    font-weight: 700;
     border: none;
 }
 
@@ -104,6 +104,8 @@ body.light-theme {
 .card-container.safari-settings p {
     font-size: 1.125rem;
 }
+
+.card-container.safari-settings a { color: inherit; }
 
 .card-content {
     padding: 1.25rem;
@@ -293,7 +295,7 @@ h3 {
     flex-wrap: wrap;
     justify-content: center;
     gap: 1.25rem;
-    margin: 1.25rem auto;
+    margin: 1.25rem auto 3rem; /* space below the color pickers */
     max-width: 920px;
     width: 90%;
 }
@@ -362,6 +364,7 @@ footer a {
 
     .cards-flex-wrapper {
         margin-top: 0;
+        margin-bottom: 3rem; /* space below the color pickers */
     }
 
     .card-container {
@@ -389,7 +392,7 @@ footer a {
 }
 
 .card-desc {
-    font-size: 0.875rem;
+    font-size: 1.125rem;
     margin: 0 0 1rem 0;
     text-align: left;
 }
@@ -415,7 +418,7 @@ footer a {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 1.125rem;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -439,7 +442,7 @@ footer a {
 
 .inline-code {
     font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-    font-size: 0.75rem;
+    font-size: 0.9em; /* scales with the text around it */
     white-space: nowrap;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
@@ -469,7 +472,7 @@ footer a {
     z-index: 1001;
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* both pills share the widest width */
+    align-items: flex-start;
     gap: 8px;
     pointer-events: none;
 }
@@ -501,6 +504,7 @@ footer a {
 .corner-pill[hidden] { display: none; }
 
 #reload-button {
+    min-width: 0;
     pointer-events: auto;
     cursor: pointer;
 }
@@ -610,19 +614,10 @@ input.color-swatch::-moz-color-swatch { border: none; border-radius: 0.35rem; }
 }
 
 .test-options .test-option { margin-bottom: 0; }
-.option-label.test-option { white-space: normal; flex-wrap: wrap; row-gap: 0.3rem; }
+.option-label.test-option { white-space: normal; flex-wrap: nowrap; }
+.option-label.test-option input { flex: none; }
+.option-label.test-option .inline-code { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 
-/* Intro below the title */
-.intro {
-    text-align: left;
-    max-width: 40rem;
-    width: 90%;
-    margin: 0.5rem auto 1.5rem;
-    font-size: 1.125rem; /* matches the Safari settings paragraph (18px) */
-    line-height: 1.5;
-}
-
-.intro a { color: inherit; }
 
 .test-slider { grid-template-columns: auto 1fr; }
 
