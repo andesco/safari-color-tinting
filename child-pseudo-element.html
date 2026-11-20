@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari Color Tinting: Child and Pseudo-Element</title>
+<style>
+    /* Three colors, each with a name, so the tint is easy to read */
+    :root {
+        --page: #0088ff;   /* blue: the page */
+        --header: #ff3b30; /* red: the fixed element */
+        --layer: #ffcc00;  /* yellow: a child or a ::before inside it */
+    }
+
+    html, body { margin: 0; }
+
+    body {
+        background-color: var(--page);
+        color: #fff;
+        font: 1.0625rem/1.5 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        padding: 24px 16px 32px;
+    }
+
+    /* The fixed element at each edge: narrowed to 12px tall, full width,
+       5px on screen at the top and 4px at the bottom */
+    .bar {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        z-index: 10;
+    }
+
+    .bar.top { top: -7px; }
+    .bar.bottom { bottom: -8px; }
+
+    .bar.red { background-color: var(--header); }
+
+    /* The layer: a child element or a ::before, yellow */
+    .layer, .bar.before::before {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: var(--layer);
+    }
+
+    .bar.before::before { content: ""; }
+
+    .layer.full, .bar.before.full::before { left: 0; right: 0; }
+    .layer.center, .bar.before.center::before { left: 25%; right: 25%; }
+    .layer.side, .bar.before.side::before { left: 0; right: 60%; }
+
+    main { max-width: 34rem; margin: 0 auto; }
+
+    h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 0.75rem; }
+    .breadcrumbs { font-size: 0.95rem; margin: 0 0 0.5rem; }
+    .breadcrumbs a { font-weight: 600; }
+
+    .lead { margin: 0 0 1.25rem; }
+
+    .swatch {
+        display: inline-block;
+        width: 0.85em;
+        height: 0.85em;
+        margin: 0 0.15em 0 0.1em;
+        border-radius: 0.2em;
+        border: 1.5px solid #fff;
+        vertical-align: -0.05em;
+    }
+
+    .swatch.is-page { background: var(--page); }
+    .swatch.is-header { background: var(--header); }
+    .swatch.is-layer { background: var(--layer); }
+
+    fieldset { border: 0; margin: 0; padding: 0; }
+
+    .case {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.15rem 0.6rem;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+    }
+
+    .case:has(input:checked) { background: rgba(255, 255, 255, 0.28); }
+    .case input { margin: 0.3rem 0 0; width: 1.1rem; height: 1.1rem; }
+    .case strong { font-weight: 600; }
+    .case span { grid-column: 2; }
+
+    .result {
+        margin: 0 0 1rem;
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+        background: rgba(0, 0, 0, 0.25);
+    }
+
+    .result p { margin: 0; }
+    .result p + p { margin-top: 0.5rem; }
+
+    pre {
+        margin: 0.75rem 0 0;
+        padding: 0.75rem 0.9rem;
+        border-radius: 0.75rem;
+        background: rgba(0, 0, 0, 0.35);
+        font: 0.85rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    h2 { font-size: 1.15rem; margin: 1.25rem 0 0.5rem; }
+    .rules { padding-left: 1.2rem; margin: 0; }
+    .rules li + li { margin-top: 0.4rem; }
+    .note { font-size: 0.9rem; opacity: 0.85; }
+    footer { margin-top: 1.5rem; font-size: 0.95rem; }
+    a { color: #fff; }
+</style>
+</head>
+<body>
+<div id="top" class="bar top"></div>
+<div id="bottom" class="bar bottom"></div>
+
+<main>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Child and Pseudo-Element</span></nav>
+    <h1>Child and Pseudo-Element</h1>
+    <p class="lead">A fixed element at the top or the bottom edge often has more than one color in it: its own background, plus a child or a <code>::before</code> on top. Which one does Safari use for the status bar and the toolbar?</p>
+    <p class="lead">Colors: <span class="swatch is-page"></span> blue page, <span class="swatch is-header"></span> red fixed element, <span class="swatch is-layer"></span> yellow child or <code>::before</code>. Pick a case and compare the bars with the status bar and the toolbar.</p>
+
+    <div class="result" id="result"></div>
+
+    <fieldset id="cases"></fieldset>
+
+    <h2>Rules</h2>
+    <ul class="rules">
+        <li>Safari uses the color of the fixed element.</li>
+        <li>A child supplies the color only when the element has no color, the child covers the center of the edge, and it is at least 90% as wide as the screen. A narrower child has no effect.</li>
+        <li>A <code>::before</code> or <code>::after</code> counts as part of its element. Safari sees its color only by sampling pixels, and only when the bar is fully on screen and at least 6px tall. A narrow bar is partly off screen, so a <code>::before</code> on it has no effect.</li>
+    </ul>
+
+    <footer><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Child and Pseudo-Element</span></nav></footer>
+</main>
+
+<script>
+// Each case reloads the page (?case=…), so Safari samples it fresh. On macOS
+// and iPad Safari stops updating the top edge after an interaction.
+const CASES = [
+    { id: 'red', group: 'Fixed element', title: 'Red element', detail: 'No child, no <code>::before</code>.',
+      bar: 'red', expect: 'header',
+      why: 'Safari uses the background color of the fixed element.' },
+
+    { id: 'child', group: 'Child', title: 'Transparent element + yellow child', detail: 'The child is full width.',
+      bar: '', child: 'full', expect: 'layer',
+      why: 'The element has no color. The child covers the center of the edge, so Safari uses the color of the child.' },
+    { id: 'red-child-full', title: 'Red element + yellow child', detail: 'The child is full width, on top of the red.',
+      bar: 'red', child: 'full', expect: 'page',
+      why: 'Safari does not tint, and uses the page color. With a taller bar, fully on screen, the child wins and Safari uses yellow. The WebKit source does not explain the difference.' },
+    { id: 'red-child', title: 'Red element + yellow child in the center', detail: 'The child is half as wide as the screen.',
+      bar: 'red', child: 'center', expect: 'header',
+      why: 'The child is too narrow. Like the fixed element, a child must be at least 90% as wide as the screen. Safari uses the color of the element instead.' },
+    { id: 'child-center', title: 'Transparent element + yellow child in the center', detail: 'The child is half as wide as the screen.',
+      bar: '', child: 'center', expect: 'page',
+      why: 'The child is too narrow and the element has no color, so Safari does not tint: it uses the page color.' },
+
+    { id: 'before', group: '<code>::before</code>', title: 'Transparent element + yellow <code>::before</code>', detail: 'The <code>::before</code> is full width.',
+      bar: 'before full', expect: 'page',
+      why: 'Safari does not see the <code>::before</code> as a separate layer. The element has no color, so Safari can only sample the pixels at the edge, and it samples only a bar that is fully on screen. This bar is partly off screen, so Safari does not tint.' },
+    { id: 'red-before', title: 'Red element + yellow <code>::before</code> in the center', detail: 'The <code>::before</code> covers the middle half.',
+      bar: 'red before center', expect: 'header',
+      why: 'Safari treats the <code>::before</code> as part of its element and uses the color of the element. This is also true when the <code>::before</code> is full width.' },
+];
+
+const NAMES = { page: 'blue', header: 'red', layer: 'yellow' };
+const NAME_NOTE = { page: ' (the page: no tint)', header: ' (the fixed element)', layer: ' (the child or <code>::before</code>)' };
+
+const caseId = new URLSearchParams(location.search).get('case');
+const current = CASES.find((c) => c.id === caseId) || CASES[0];
+
+// The bars
+for (const id of ['top', 'bottom']) {
+    const bar = document.getElementById(id);
+    bar.className = `bar ${id} ${current.bar}`.trim();
+    if (current.child) {
+        const child = document.createElement('div');
+        child.className = `layer ${current.child}`;
+        bar.append(child);
+    }
+}
+
+// The options
+document.getElementById('cases').innerHTML = CASES.map((c) => `${c.group ? `<h2>${c.group}</h2>` : ''}
+    <label class="case">
+        <input type="radio" name="case" value="${c.id}"${c === current ? ' checked' : ''}>
+        <strong>${c.title}</strong>
+        <span>${c.detail}</span>
+    </label>`).join('');
+// Each case reloads the page; keep the scroll position across the reload
+const SCROLL_KEY = 'safari-color-tinting:child-pseudo-element-scroll';
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+try {
+    const y = Number(sessionStorage.getItem(SCROLL_KEY));
+    sessionStorage.removeItem(SCROLL_KEY);
+    if (y) window.scrollTo(0, y);
+} catch { /* storage unavailable */ }
+document.getElementById('cases').addEventListener('change', (e) => {
+    try { sessionStorage.setItem(SCROLL_KEY, String(window.scrollY)); } catch { /* storage unavailable */ }
+    location.search = `?case=${e.target.value}`;
+});
+
+// What Safari shows
+document.getElementById('result').innerHTML = `
+    <p>Safari uses <span class="swatch is-${current.expect}"></span> <strong>${NAMES[current.expect]}</strong>${NAME_NOTE[current.expect]}.</p>
+    <p>${current.why}</p>`;
+</script>
+</body>
+</html>
