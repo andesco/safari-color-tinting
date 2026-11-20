@@ -5,26 +5,22 @@ body {
     text-align: center;
 }
 
-#fixed-top {
+.fixed-bar {
     position: fixed;
-    top: 4px; /* <5px to supersede <body> on iOS and macOS*/
     left: 0;
     margin: 0;
     padding: 0;
-    width: 90%; /* >79% to superced <body> on macOS; >88% to superced <body> on macOS; */
-    min-height: 15px; /* >2px for dynamic color on macOS */
+    width: 90%; /* ≥ 90% of (viewport width − 8px) to supersede <body> */
+    min-height: 15px; /* > 10px: Safari reads the color (6–10px: samples pixels) */
     z-index: 1000;
 }
 
-#fixed-bottom {
-    position: fixed;
-    bottom: 3px; /* <4px to supersede <body> on iOS*/
-    left: 0;
-    margin: 0;
-    padding: 0;
-    width: 90%; /* >88% to superced <body> on iOS*/
-    min-height: 15px; /* >2px for dynamic color iOS */
-    z-index: 1000;
+#top-bar {
+    top: 4px; /* covers the sample point 4px below the top edge */
+}
+
+#bottom-bar {
+    bottom: 3px; /* covers the sample point 4px above the bottom edge */
 }
 
 body.dark-theme {
@@ -153,26 +149,14 @@ code.code-gen {
     display: block;
     margin-bottom: 0.5rem;
     border-radius: 8px;
-    white-space: pre-wrap !important;
+    white-space: pre !important;
     text-align: left;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    min-height: 11rem;
-}
-
-span.learn-more {
-    display: block;
-    align-self: flex-start;
-    text-align: left;
+    height: 14rem;
+    overflow: auto;
+    box-sizing: border-box;
     width: 100%;
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.65;
-}
-
-span.learn-more a {
-    color: inherit;
-    text-decoration: none;
+    font-size: 0.8rem;
+    -webkit-overflow-scrolling: touch;
 }
 
 
@@ -333,6 +317,20 @@ h3 {
     height: 1.25em;
     transform: scale(1.00);
 }
+
+#resetButton::after {
+    mask-image: url('./images/reset.svg');
+    width: 1.25em;
+    height: 1.25em;
+}
+
+/* Narrow screens: icon above the label to save width */
+@media screen and (max-width: 512px) {
+    .button-container .action-button {
+        flex-direction: column-reverse;
+        gap: 0.3em;
+    }
+}
 footer {
     display: flex;
     align-items: center;
@@ -385,19 +383,18 @@ footer a {
     }
 }
 
-/* Disqualifier test card */
-.disqualifier-test {
+/* Test cards */
+.test-card {
     align-items: flex-start;
 }
 
-.disqualifier-desc {
+.card-desc {
     font-size: 0.875rem;
-    opacity: 0.7;
     margin: 0 0 1rem 0;
     text-align: left;
 }
 
-.disqualifier-row {
+.option-row {
     display: grid;
     grid-template-columns: 9rem 1fr auto;
     align-items: center;
@@ -406,7 +403,7 @@ footer a {
     margin-bottom: 0.75rem;
 }
 
-.disqualifier-checkboxes {
+.option-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -414,7 +411,7 @@ footer a {
     margin-bottom: 0.75rem;
 }
 
-.disqualifier-label {
+.option-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -423,24 +420,24 @@ footer a {
     cursor: pointer;
 }
 
-.disqualifier-label input[type="checkbox"] {
+.option-label input[type="checkbox"] {
     width: 1.25rem;
     height: 1.25rem;
     cursor: pointer;
     flex-shrink: 0;
 }
 
-.disqualifier-row input[type="range"] {
+.option-row input[type="range"] {
     width: 100%;
     cursor: pointer;
 }
 
-.disqualifier-row input[type="range"]:disabled {
+.option-row input[type="range"]:disabled {
     opacity: 0.35;
     cursor: default;
 }
 
-.disqualifier-code {
+.inline-code {
     font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     font-size: 0.75rem;
     white-space: nowrap;
@@ -448,127 +445,200 @@ footer a {
     border-radius: 4px;
 }
 
-.light-theme .disqualifier-code {
+.light-theme .inline-code {
     background: rgba(0,0,0,0.07);
 }
 
-.dark-theme .disqualifier-code {
+.dark-theme .inline-code {
     background: rgba(255,255,255,0.1);
 }
 
-.refresh-hint {
-    visibility: hidden;
-    display: inline-block;
-    font-size: 0.75rem;
-    line-height: 1;
-    opacity: 0.6;
-    color: inherit;
-    text-decoration: none;
-    margin-top: 0.5rem;
-    cursor: pointer;
-}
 
-.refresh-hint.visible {
-    visibility: visible;
-}
 
-/* Offset the reserved space (0.75rem font + 0.5rem margin-top = 1.25rem) */
-#card-fixed {
-    margin-bottom: -1.25rem;
-}
-
-.disqualifier-test {
+.test-card {
     margin-bottom: 0 !important;
 }
 
-/* Disqualifier badges */
-.disqualifier-badge {
-    font-size: 0.625rem;
+
+/* Bottom left corner: "↻ Reload" above "↓ Narrow Element Enabled" or "↓ Hidden Element Enabled"; top left corner: the same with ↑.
+   Narrow, so Safari never samples them (needs 90% of the viewport width less 8px). */
+.corner-stack {
+    position: fixed;
+    left: 12px;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* both pills share the widest width */
+    gap: 8px;
+    pointer-events: none;
+}
+
+.corner-stack.top-stack {
+    top: calc(env(safe-area-inset-top) + 12px);
+    bottom: auto;
+}
+
+.corner-pill {
+    box-sizing: border-box;
+    min-width: 15rem;
+    padding: 0.75rem 1.1rem;
+    border: 0;
+    border-radius: 0.9rem;
+    font: inherit;
+    font-size: 1rem;
     font-weight: 600;
-    text-transform: uppercase;
+    text-align: left;
+    background: #000;
+    color: #fff;
+}
+
+.corner-stack.on-dark .corner-pill {
+    background: #fff;
+    color: #000;
+}
+
+.corner-pill[hidden] { display: none; }
+
+#reload-button {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Native color picker */
+.color-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+input.color-swatch {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 3rem;
+    height: 2.5rem;
+    padding: 0;
+    color: inherit;
+    border: 2px solid currentColor;
+    border-radius: 0.6rem;
+    background: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+input.color-swatch::-webkit-color-swatch-wrapper { padding: 3px; }
+input.color-swatch::-webkit-color-swatch { border: none; border-radius: 0.35rem; }
+input.color-swatch::-moz-color-swatch { border: none; border-radius: 0.35rem; }
+
+.color-hex {
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-weight: 500;
+    font-size: 1.05em;
     letter-spacing: 0.05em;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
+}
+
+/* Links to the Child and Pseudo-Element and the Scrim pages */
+.page-button {
+    display: block;
+    box-sizing: border-box;
+    align-self: center;
+    min-width: 15rem;
+    margin: 0.5rem auto 0;
+    padding: 0.75rem 1.1rem;
+    border-radius: 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    /* Same color as the text and the headers: black on a light page, white on a dark page */
+    background: #000;
+    color: #fff;
+}
+
+.dark-theme .page-button { background: #fff; color: #000; }
+
+/* What Safari Samples: one option = control, prose, code */
+.test-group {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.6rem;
+    text-align: left;
+    align-self: flex-start;
+}
+
+.test-option {
+    width: 100%;
+    margin-bottom: 0.6rem;
+    text-align: left;
+}
+
+.test-option .option-label {
+    white-space: normal;
+    flex-wrap: wrap;
+}
+
+
+.option-code {
+    text-align: left;
+    margin: 0.35rem 0 0.4rem 1.75rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.light-theme .option-code { background: rgba(0, 0, 0, 0.06); }
+.dark-theme .option-code { background: rgba(255, 255, 255, 0.08); }
+.option-code code { font: inherit; background: none; padding: 0; color: inherit; }
+.test-option .option-label { flex-wrap: wrap; row-gap: 0.3rem; }
+
+.test-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.test-slider {
+    margin: -0.2rem 0 0.2rem 1.75rem;
+    width: calc(100% - 1.75rem);
+}
+
+.test-options .test-option { margin-bottom: 0; }
+.option-label.test-option { white-space: normal; flex-wrap: wrap; row-gap: 0.3rem; }
+
+/* Intro below the title */
+.intro {
+    text-align: left;
+    max-width: 40rem;
+    width: 90%;
+    margin: 0.5rem auto 1.5rem;
+    font-size: 1.125rem; /* matches the Safari settings paragraph (18px) */
+    line-height: 1.5;
+}
+
+.intro a { color: inherit; }
+
+.test-slider { grid-template-columns: auto 1fr; }
+
+.test-slider { grid-template-columns: auto 1fr auto; }
+.test-group + .card-desc { margin-bottom: 0.6rem; }
+
+/* Marks an option that does not achieve the card's goal */
+.option-badge {
+    margin-left: auto;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
-.badge-prevents {
-    background: rgba(25, 135, 84, 0.15);
-    color: #198754;
-}
-
-.badge-sampled {
-    background: rgba(220, 53, 69, 0.15);
-    color: #dc3545;
-}
-
-.dark-theme .badge-prevents {
-    background: rgba(25, 135, 84, 0.25);
-    color: #75b798;
-}
-
-.dark-theme .badge-sampled {
-    background: rgba(220, 53, 69, 0.25);
-    color: #ea868f;
-}
-
-/* Hidden tinting element */
-#hidden-tint-element {
-    display: none;
-    position: fixed;
-    bottom: -8px;
-    left: 0;
-    width: 90%;
-    min-height: 12px;
-    z-index: 1000;
-}
-
-/* Bypass transparent parent element */
-#bypass-element {
-    display: none;
-    position: fixed;
-    top: 4px;
-    left: 0;
-    width: 90%;
-    min-height: 15px;
-    z-index: 1000;
-    background-color: transparent;
-}
-
-#bypass-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-/* Pseudo-element test */
-#pseudo-element {
-    display: none;
-    position: fixed;
-    top: 4px;
-    left: 0;
-    width: 90%;
-    min-height: 15px;
-    z-index: 1000;
-}
-
-#pseudo-element.use-before::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-#pseudo-element.use-after::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
+.badge-fails { background: rgba(220, 53, 69, 0.9); color: #fff; }

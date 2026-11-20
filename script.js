@@ -1,1660 +1,521 @@
-// Bootstrap Colors preset for color pickers
-const bootstrapColors = [
-  '#031633', '#052c65', '#084298', '#0a58ca', '#0d6efd', '#3d8bfd',
-  '#6ea8fe', '#9ec5fe', '#cfe2ff',
-  '#140330', '#290661', '#3d0a91', '#520dc2', '#6610f2', '#8540f5',
-  '#a370f7', '#c29ffa', '#e0cffc',
-  '#160d27', '#2c1a4d', '#432874', '#59359a', '#6f42c1', '#8c68cd',
-  '#a98eda', '#c5b3e6', '#e2d9f3',
-  '#2b0a1a', '#561435', '#801f4f', '#ab296a', '#d63384', '#de5c9d',
-  '#e685b5', '#efadce', '#f7d6e6',
-  '#2c0b0e', '#58151c', '#842029', '#b02a37', '#dc3545', '#e35d6a',
-  '#ea868f', '#f1aeb5', '#f8d7da',
-  '#331904', '#653208', '#984c0c', '#ca6510', '#fd7e14', '#fd9843',
-  '#feb272', '#fecba1', '#ffe5d0',
-  '#332701', '#664d03', '#997404', '#cc9a06', '#ffc107', '#ffcd39',
-  '#ffda6a', '#ffe69c', '#fff3cd',
-  '#051b11', '#0a3622', '#0f5132', '#146c43', '#198754', '#479f76',
-  '#75b798', '#a3cfbb', '#d1e7dd',
-  '#06281e', '#0d503c', '#13795b', '#1aa179', '#20c997', '#4dd4ac',
-  '#79dfc1', '#a6e9d5', '#d2f4ea',
-  '#032830', '#055160', '#087990', '#0aa2c0', '#0dcaf0', '#3dd5f3',
-  '#6edff6', '#9eeaf9', '#cff4fc',
-  '#212529', '#343a40', '#495057', '#6c757d', '#adb5bd', '#ced4da',
-  '#dee2e6', '#e9ecef', '#f8f9fa',
-];
+// Safari Color Tinting demo
+//
+// One state object drives the page. On load it comes from sessionStorage when
+// the tab is reloaded, else from the URL (a shared link), else the defaults with
+// the three colors saved in localStorage. Nothing writes to the address bar;
+// Share and Copy build a URL on demand. The test pages (tests/) read the same
+// saved colors.
 
-const selectThemeWithLuma = (bgColor) => {
-  // Get luma value from luma.js
-  const Y = getLuma(bgColor);
+(() => {
+'use strict';
 
-  // Threshold: roughly midpoint (127.5)
-  // Y ≤ 127.5 = dark background, use dark theme with light text
-  // Y > 127.5 = light background, use light theme with dark text
-  return Y <= 127.5;
+// ---------------------------------------------------------------------------
+// Color helpers
+// ---------------------------------------------------------------------------
+
+// "08F", "0088ff", "#0088FF" → "#0088ff"; anything else → null
+const parseHex = (value) => {
+    let hex = String(value || '').trim().replace(/^#/, '').toLowerCase();
+    if (/^[0-9a-f]{3}$/.test(hex)) hex = hex.replace(/./g, (c) => c + c);
+    return /^[0-9a-f]{6}$/.test(hex) ? `#${hex}` : null;
 };
 
-// Check if 6-digit hex can be shortened to 3-digit
-// Can only shorten if each character appears twice: aabbcc → abc
-const canShortenHex = (hex) => {
-    // Remove # if present and ensure lowercase
-    const clean = hex.replace(/^#/, '').toLowerCase();
-    if (clean.length !== 6) return false;
+const hexToRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const rgbToHex = (r, g, b) => '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
 
-    // Check if pattern is aabbcc (each char doubles)
-    return clean[0] === clean[1] && clean[2] === clean[3] && clean[4] === clean[5];
-};
-
-// Shorten 6-digit hex to 3-digit: 0088ff → 08f
-const shortenHex = (hex) => {
-    const clean = hex.replace(/^#/, '').toLowerCase();
-    if (clean.length === 6 && canShortenHex(clean)) {
-        return clean[0] + clean[2] + clean[4];
-    }
-    return clean; // Return as-is if can't shorten
-};
-
-// Expand 3-digit hex to 6-digit: 08f → 0088ff
-const expandHex = (hex) => {
-    const clean = hex.replace(/^#/, '').toLowerCase();
-    if (clean.length === 3) {
-        return clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
-    }
-    return clean; // Already 6 digits or invalid
-};
-
-// Convert ColorPicker.Color object to 6-digit hex string
-// ColorPicker's toString() may return 3-digit shorthand, so we expand it
-const toHex6 = (colorObj) => {
-    const hexString = colorObj.toString(); // May be 3 or 6 digit
-    const clean = hexString.replace(/^#/, '');
-    return '#' + expandHex(clean);
-};
-
-const hexToRgb = (hex) => {
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-};
-
-// Detect if a string is RGB/RGBA format
-const isRgbFormat = (str) => /^rgba?\s*\(/i.test(str);
-
-// Detect if a string is HEX format
-const isHexFormat = (str) => /^#?[0-9a-fA-F]{3,8}$/.test(str);
-
-// Normalize RGB to no alpha (remove alpha channel)
-const normalizeRgb = (rgb) => {
-    // Match rgb(r, g, b) or rgba(r, g, b, a) with various formats
-    const match = rgb.match(/rgba?\s*\(\s*(\d+)\s*,?\s*(\d+)\s*,?\s*(\d+)\s*(?:,?\s*[\d.]+\s*)?\)/i);
-    if (match) {
-        const [, r, g, b] = match;
-        return `rgb(${r}, ${g}, ${b})`;
-    }
-    return rgb;
-};
-
-// Normalize hex to 6-digit format (no alpha)
-const normalizeHex = (hex) => {
-    // Remove # if present
-    hex = hex.replace(/^#/, '');
-
-    // If 3-digit hex, expand to 6-digit
-    if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-
-    // If 8-digit hex (with alpha), strip alpha channel
-    if (hex.length === 8) {
-        hex = hex.substring(0, 6);
-    }
-
-    // If 4-digit hex (with alpha), expand to 6-digit and strip alpha
-    if (hex.length === 4) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-
-    // Ensure we only have 6 characters
-    hex = hex.substring(0, 6);
-
-    // Return with # prefix in lowercase
-    return '#' + hex.toLowerCase();
-};
-
-// Normalize color value based on format
-const normalizeColor = (value) => {
-    const str = String(value).trim();
-
-    if (isRgbFormat(str)) {
-        return normalizeRgb(str);
-    } else if (isHexFormat(str)) {
-        return normalizeHex(str);
-    }
-
-    // If unknown format, try to normalize as hex
-    return normalizeHex(str);
-};
-
-const rgbToHex = (r, g, b) => "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-
-// Helper function to convert HEX to HSL
-const hexToHsl = (hex) => {
-    const rgb = hexToRgb(hex);
-    if (!rgb) return null;
-
-    let r = rgb.r / 255;
-    let g = rgb.g / 255;
-    let b = rgb.b / 255;
-
-    let max = Math.max(r, g, b);
-    let min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-        h = s = 0; // achromatic
-    } else {
-        let d = max - min;
+// Rotate the hue of a hex color by `deg` degrees (HSL)
+const spinHex = (hex, deg) => {
+    const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    let h = 0, s = 0;
+    if (max !== min) {
+        const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r:
-                h = (g - b) / d + (g < b ? 6 : 0);
-                break;
-            case g:
-                h = (b - r) / d + 2;
-                break;
-            case b:
-                h = (r - g) / d + 4;
-                break;
-        }
-        h /= 6;
+        h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h *= 60;
+    }
+    h = (h + deg + 360) % 360;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    const [r1, g1, b1] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x]
+        : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return rgbToHex(...[r1, g1, b1].map((v) => Math.round((v + m) * 255)));
+};
+
+// Dark background (luma ≤ 127.5, see luma.js) → light text
+const isDark = (hex) => getLuma(hex) <= 127.5;
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+const DEFAULTS = {
+    body:  { on: true,  color: '#0088ff' },
+    fixed: { on: true,  color: '#ffcc33' },
+    meta:  { on: false, color: '#363636' },
+    // Fixed element without tint: one technique at a time
+    technique: '',           // '' | 'saturate' | 'blur' | 'opacity'
+    // Tint without a visible element
+    hide: '',                // '' | 'offscreen' | 'opacity' | 'hidden' | 'display'
+    hiddenTop: false,        // top bar moved past the edge: 12px tall, 5px on screen
+    hiddenBottom: false,     // bottom bar moved past the edge: 12px tall, 4px on screen
+};
+// WebKit hit-tests a point 4px inside each viewport edge (PageColorSampler::
+// fixedContainerSampleRectMargin) and reads the background color only of a box
+// more than 10px tall (thinBorderWidth), off-screen part included. A 12px bar
+// must keep 5px on screen at the top and 4px at the bottom (measured in the
+// iOS Simulator, iOS 26.4 and 27.2).
+const HIDDEN_BAR_HEIGHT = 12;
+const HIDDEN_OFFSET = { top: -7, bottom: -8 }; // 5px on screen at the top, 4px at the bottom
+
+const BACKDROP = { saturate: 'saturate(100%)', blur: 'blur(0px)', opacity: 'opacity(1)' };
+const TECHNIQUE_CODE = { saturate: 's', blur: 'b', opacity: 'o' };
+
+const HIDE_CODE = { offscreen: 'x', opacity: 'o', hidden: 'h', display: 'd' };
+// Off screen: both bars 12px tall, moved 12px past the edge (0px on screen)
+const OFFSCREEN_OFFSET = -12;
+const invert = (map) => Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]));
+
+// Color param: "0088ff" (on) or "0,0088ff" (off). Legacy "1,0088ff" also means on.
+const parseColorParam = (param) => {
+    if (param == null) return null;
+    const parts = param.split(',');
+    const color = parseHex(parts.length === 2 ? parts[1] : parts[0]);
+    const on = parts.length === 2 ? parts[0] === '1' : !/^(false|none|)$/i.test(param);
+    return { on: on && !!color, color };
+};
+
+const stateFromURL = (search) => {
+    const p = new URLSearchParams(search);
+    const state = withSavedColors(structuredClone(DEFAULTS));
+    const colors = {};
+    for (const [key, name] of [['b', 'body'], ['f', 'fixed'], ['m', 'meta']]) {
+        const parsed = parseColorParam(p.get(key));
+        if (!parsed) continue;
+        colors[name] = parsed;
+        state[name].on = parsed.on;
+        if (parsed.color) state[name].color = parsed.color;
     }
 
-    return {
-        h: h * 360,
-        s: s * 100,
-        l: l * 100
-    };
-};
-
-// Helper function to convert HSL to HEX
-const hslToHex = (h, s, l) => {
-    h /= 360;
-    s /= 100;
-    l /= 100;
-    let c = (1 - Math.abs(2 * l - 1)) * s;
-    let x = c * (1 - Math.abs((h * 6) % 2 - 1));
-    let m = l - c / 2;
-    let r = 0,
-        g = 0,
-        b = 0;
-
-    if (0 <= h && h < 1 / 6) {
-        r = c;
-        g = x;
-        b = 0;
-    } else if (1 / 6 <= h && h < 2 / 6) {
-        r = x;
-        g = c;
-        b = 0;
-    } else if (2 / 6 <= h && h < 3 / 6) {
-        r = 0;
-        g = c;
-        b = x;
-    } else if (3 / 6 <= h && h < 4 / 6) {
-        r = 0;
-        g = x;
-        b = c;
-    } else if (4 / 6 <= h && h < 5 / 6) {
-        r = x;
-        g = 0;
-        b = c;
-    } else if (5 / 6 <= h && h < 1) {
-        r = c;
-        g = 0;
-        b = x;
-    }
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-
-    return rgbToHex(r, g, b);
-};
-
-// Function to get complementary color
-const getComplementaryColor = (hex) => {
-    const hsl = hexToHsl(hex);
-    if (!hsl) return null;
-
-    let complementaryHue = (hsl.h + 180) % 360;
-    return hslToHex(complementaryHue, hsl.s, hsl.l);
-};
-
-// Function to get complement colors (returns array of 3 colors including the original)
-const getTriadicColors = (hex) => {
-    const hsl = hexToHsl(hex);
-    if (!hsl) return null;
-
-    const color1 = hex;
-    const color2 = hslToHex((hsl.h + 120) % 360, hsl.s, hsl.l);
-    const color3 = hslToHex((hsl.h + 240) % 360, hsl.s, hsl.l);
-
-    return [color1, color2, color3];
-};
-
-
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOMContentLoaded fired");
-    console.log("ColorPicker available:", typeof ColorPicker);
-
-    const highlightJsLightTheme = document.querySelector('link[href*="github.min.css"]');
-    const highlightJsDarkTheme = document.querySelector('link[href*="github-dark-dimmed.min.css"]');
-
-    // Replace characters with SVG icons
-    const svgChevron = '<svg style="position:relative;top:0.15em;" width="1em" height="1em" viewBox="0 0 16 16"><path fill="currentColor" d="M5.0 3.0 L10.2 8.0 L5.0 13.0 L6.4 14.4 L12.8 8.0 L6.4 1.6 Z"/></svg>';
-
-
-    const replaceCharactersWithSvg = (element) => {
-        const walker = document.createTreeWalker(
-            element,
-            NodeFilter.SHOW_TEXT,
-            null,
-            false
-        );
-
-        const nodesToReplace = [];
-        let node;
-
-        while (node = walker.nextNode()) {
-            if (node.nodeValue.includes('›')) {
-                nodesToReplace.push(node);
-            }
+    // Only one color in the URL: derive the other two (180° hue rotation)
+    const given = Object.keys(colors);
+    if (given.length === 1 && colors[given[0]].color) {
+        const complement = spinHex(colors[given[0]].color, 180);
+        for (const name of ['body', 'fixed', 'meta']) {
+            if (name !== given[0]) state[name] = { on: true, color: complement };
         }
+    }
 
-        nodesToReplace.forEach(node => {
-            const span = document.createElement('span');
-            let html = node.nodeValue;
-            html = html.replace(/›/g, svgChevron);
+    state.technique = invert(TECHNIQUE_CODE)[p.get('nt')] || '';
+    state.hide = invert(HIDE_CODE)[p.get('hide')] || '';
+    // edge=t | b | tb. Older links: edge=<px on screen>, hb/ht=<bottom offset>
+    const edge = p.get('edge') || '';
+    if (/^\d+$/.test(edge)) {
+        state.hiddenTop = Number(edge) >= 5;
+        state.hiddenBottom = Number(edge) >= 4;
+    } else {
+        state.hiddenTop = edge.includes('t');
+        state.hiddenBottom = edge.includes('b') || /^-?\d+$/.test(p.get('hb') ?? p.get('ht') ?? '');
+    }
 
-            span.innerHTML = html;
-            node.parentNode.replaceChild(span, node);
+    if (state.hide === 'offscreen') state.hiddenTop = state.hiddenBottom = false;
+    // Older links: bf, vis, at, bp, ps
+    if (!state.technique) {
+        const vis = p.get('vis') || '';
+        state.technique = invert({ saturate: 's', blur: 'b', opacity: 'o' })[p.get('bf')] || '';
+        if (!state.hide) state.hide = vis.includes('d') ? 'display' : vis.includes('o') ? 'opacity' : vis.includes('h') ? 'hidden' : '';
+    }
+    return state;
+};
+
+// One short parameter per option; options at their default are left out.
+// When any color differs from the default, all three colors are written, so a
+// hand-typed URL with a single color still derives the other two.
+const urlFromState = (state) => {
+    const color = ({ on, color }) => (on ? '' : '0,') + color.slice(1);
+    const same = (name) => state[name].on === DEFAULTS[name].on && state[name].color === DEFAULTS[name].color;
+    const params = [];
+    if (!['body', 'fixed', 'meta'].every(same)) {
+        params.push(`b=${color(state.body)}`, `f=${color(state.fixed)}`, `m=${color(state.meta)}`);
+    }
+    if (state.technique) params.push(`nt=${TECHNIQUE_CODE[state.technique]}`);
+    if (state.hide) params.push(`hide=${HIDE_CODE[state.hide]}`);
+    if (state.hiddenTop || state.hiddenBottom) params.push(`edge=${state.hiddenTop ? 't' : ''}${state.hiddenBottom ? 'b' : ''}`);
+    return location.origin + location.pathname + (params.length ? `?${params.join('&')}` : '');
+};
+
+// Reload keeps the options and the scroll position (sessionStorage is per tab)
+const STORAGE_KEY = 'safari-color-tinting';
+const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+const loadSession = () => {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY));
+        return saved && saved.state && 'technique' in saved.state ? saved : null;
+    } catch {
+        return null;
+    }
+};
+// The three colors persist in localStorage, across tabs and visits
+const COLORS_KEY = 'safari-color-tinting:colors';
+function withSavedColors(base) {
+    try {
+        const saved = JSON.parse(localStorage.getItem(COLORS_KEY));
+        for (const name of ['body', 'fixed', 'meta']) {
+            const color = parseHex(saved?.[name]);
+            if (color) base[name].color = color;
+        }
+    } catch { /* storage unavailable or invalid: keep the defaults */ }
+    return base;
+}
+const saveColors = () => {
+    try {
+        localStorage.setItem(COLORS_KEY, JSON.stringify({ body: state.body.color, fixed: state.fixed.color, meta: state.meta.color }));
+    } catch { /* storage unavailable */ }
+};
+
+const saveSession = () => {
+    try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ state, scrollY: window.scrollY }));
+    } catch { /* storage unavailable: reload falls back to the defaults */ }
+};
+
+const session = navigationType === 'reload' ? loadSession() : null;
+const state = session ? { ...structuredClone(DEFAULTS), ...session.state } : stateFromURL(location.search);
+if (!(state.technique in TECHNIQUE_CODE)) state.technique = '';
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const initialColors = { body: state.body.color, fixed: state.fixed.color, meta: state.meta.color };
+
+// ---------------------------------------------------------------------------
+// Elements
+// ---------------------------------------------------------------------------
+
+const $ = (id) => document.getElementById(id);
+let topBar = $('top-bar');
+let bottomBar = $('bottom-bar');
+let bars = [topBar, bottomBar];
+
+// Safari keeps using a fixed element it has sampled for as long as that
+// element exists, so a change to its opacity, position or backdrop-filter does
+// not update the tint. Replacing the bars with copies makes Safari sample
+// them again (iPhone; on macOS and iPad the top edge stays locked until reload).
+let barsKey = null;
+const remountBars = () => {
+    const key = JSON.stringify([state.fixed, state.technique, state.hide, state.hiddenTop, state.hiddenBottom]);
+    if (barsKey !== null && key !== barsKey) {
+        bars = bars.map((bar) => {
+            const copy = bar.cloneNode(true);
+            bar.replaceWith(copy);
+            return copy;
         });
-    };
+        [topBar, bottomBar] = bars;
+    }
+    barsKey = key;
+};
+const el = {
+    code: $('code-gen-example'),
+    topIndicator: $('top-indicator'),
+    bottomIndicator: $('bottom-indicator'),
+    hljsLight: document.querySelector('link[href*="github.min.css"]'),
+    hljsDark: document.querySelector('link[href*="github-dark-dimmed.min.css"]'),
+};
+const picker = { body: $('color-picker-body'), fixed: $('color-picker-fixed'), meta: $('color-picker-meta') };
+const checkbox = { body: $('checkbox-body'), fixed: $('checkbox-fixed'), meta: $('checkbox-meta') };
+// Option groups: checkboxes with data-group="technique" | "hide" and a value
+const groupBoxes = (group) => [...document.querySelectorAll(`input[data-group="${group}"]`)];
+const hiddenTopBox = $('hidden-top');
+const hiddenBottomBox = $('hidden-bottom');
 
-    replaceCharactersWithSvg(document.body);
+// ---------------------------------------------------------------------------
+// Presets: native <datalist> suggestions in the browser's color picker
+// ---------------------------------------------------------------------------
 
-    // Initialize highlight.js
+const PALETTE = ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14',
+                 '#ffc107', '#198754', '#20c997', '#0dcaf0', '#212529', '#f8f9fa'];
 
+const setPresets = (input, first) => {
+    let list = $(`${input.id}-presets`);
+    if (!list) {
+        list = document.createElement('datalist');
+        list.id = `${input.id}-presets`;
+        input.after(list);
+        input.setAttribute('list', list.id);
+    }
+    const colors = [...new Set([...first.filter(Boolean), ...PALETTE])];
+    list.replaceChildren(...colors.map((c) => Object.assign(document.createElement('option'), { value: c })));
+};
 
-    // Helper function to escape HTML
-    const escapeHtml = (text) => {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    };
+const renderPresets = () => {
+    const complement = spinHex(state.body.color, 180);
+    setPresets(picker.body, [DEFAULTS.body.color, initialColors.body]);
+    setPresets(picker.fixed, [DEFAULTS.fixed.color, initialColors.fixed, complement]);
+    setPresets(picker.meta, [DEFAULTS.meta.color, initialColors.meta, complement]);
+};
 
-    // Body Background Color Picker
-    console.log("Attempting to create body color picker");
-    console.log("Element #color-picker-body exists:", !!document.getElementById("color-picker-body"));
+// ---------------------------------------------------------------------------
+// Render: apply state to the page
+// ---------------------------------------------------------------------------
 
-    if (typeof ColorPicker === 'undefined') {
-        console.error("ColorPicker is not available! The color-picker library did not load.");
+// Set an inline style property only when its value changes, so an unrelated
+// update never touches the elements Safari samples.
+const setStyle = (node, prop, value) => {
+    if (node && node.style.getPropertyValue(prop) !== value) {
+        if (value) node.style.setProperty(prop, value);
+        else node.style.removeProperty(prop);
+    }
+};
+
+const pageIsDark = () => state.body.on && isDark(state.body.color);
+
+const renderControls = () => {
+    for (const name of ['body', 'fixed', 'meta']) {
+        picker[name].value = state[name].color;
+        checkbox[name].checked = state[name].on;
+        const label = document.querySelector(`[data-hex-for="${picker[name].id}"]`);
+        if (label) label.textContent = state[name].color.toUpperCase();
+    }
+    for (const box of groupBoxes('technique')) box.checked = state.technique === box.value;
+    for (const box of groupBoxes('hide')) box.checked = state.hide === box.value;
+
+    hiddenTopBox.checked = state.hiddenTop;
+    hiddenBottomBox.checked = state.hiddenBottom;
+
+};
+
+const renderBody = () => {
+    setStyle(document.body, 'background-color', state.body.on ? state.body.color : '');
+    const dark = pageIsDark();
+    document.body.classList.toggle('dark-theme', dark);
+    document.body.classList.toggle('light-theme', !dark);
+    if (el.hljsLight && el.hljsDark) {
+        el.hljsLight.disabled = dark;
+        el.hljsDark.disabled = !dark;
+    }
+};
+
+const renderMeta = () => {
+    let tag = document.querySelector('meta[name="theme-color"]');
+    if (!state.meta.on) {
+        if (tag) tag.remove();
         return;
     }
-
-    let bodyColorPicker;
-    let metaColorPicker;
-    let fixedColorPicker;
-
-    // Checkbox references
-    let bodyCheckbox;
-    let metaCheckbox;
-    let fixedCheckbox;
-
-    // Store user-entered values to prevent library from changing them
-    let bodyLastValue = '';
-    let metaLastValue = '';
-    let fixedLastValue = '';
-    let isUpdatingBody = false;
-    let isUpdatingMeta = false;
-    let isUpdatingFixed = false;
-
-    // DOM element references needed by update functions
-    const codeGenExample = document.getElementById("code-gen-example");
-    const metaThemeColor = document.querySelector("meta[name=theme-color]");
-    const fixedTopElement = document.getElementById("fixed-top");
-    const fixedBottomElement = document.getElementById("fixed-bottom");
-
-    // Define update functions that will be used by handlers
-    const updateURLParams = () => {
-        const bodyPickerValue = document.getElementById("color-picker-body").value;
-        let bodyColorHex = (bodyPickerValue && bodyPickerValue !== 'inherit') ? expandHex(bodyPickerValue.substring(1)) : '';
-        const bodyChecked = bodyCheckbox ? bodyCheckbox.checked : true;
-
-        const metaPickerValue = document.getElementById("color-picker-meta").value;
-        let metaColorHex = (metaPickerValue && metaPickerValue !== 'inherit') ? expandHex(metaPickerValue.substring(1)) : '';
-        const metaChecked = metaCheckbox ? metaCheckbox.checked : false;
-
-        const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-        let fixedColorHex = (fixedPickerValue && fixedPickerValue !== 'inherit') ? expandHex(fixedPickerValue.substring(1)) : '';
-        const fixedChecked = fixedCheckbox ? fixedCheckbox.checked : false;
-
-        // New format: omit "1," prefix when checked (implicit), add "0," when unchecked
-        const bodyParam = bodyChecked ? bodyColorHex : `0,${bodyColorHex}`;
-        const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
-        const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
-
-        const bdSaturate = document.getElementById("test-backdrop-enabled");
-        const bdBlurEl   = document.getElementById("test-blur-enabled");
-        const bdOpEl     = document.getElementById("test-bdopacity-enabled");
-        let bfParam = '';
-        if (bdSaturate && bdSaturate.checked) bfParam = 's';
-        else if (bdBlurEl && bdBlurEl.checked) bfParam = 'b';
-        else if (bdOpEl   && bdOpEl.checked)   bfParam = 'o';
-
-        const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfParam ? `&bf=${bfParam}` : ''}`;
-        const newUrl = window.location.origin + window.location.pathname + queryString;
-        history.replaceState(null, '', newUrl);
-    };
-
-    const updateGeneratedCode = () => {
-        // Get current values and checkbox states
-        const bodyPickerValue = document.getElementById("color-picker-body").value;
-        const bodyChecked = bodyCheckbox && bodyCheckbox.checked;
-        const bodyHex = bodyPickerValue && bodyPickerValue !== 'inherit' ? normalizeColor(bodyPickerValue) : null;
-
-        const metaPickerValue = document.getElementById("color-picker-meta").value;
-        const metaChecked = metaCheckbox && metaCheckbox.checked;
-        const metaHex = metaPickerValue && metaPickerValue !== 'inherit' ? normalizeColor(metaPickerValue) : null;
-
-        const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-        const fixedChecked = fixedCheckbox && fixedCheckbox.checked;
-        const fixedHex = fixedPickerValue && fixedPickerValue !== 'inherit' ? normalizeColor(fixedPickerValue) : null;
-
-        // Build the consolidated HTML code example
-        let headContent = '';
-        if (metaHex && metaChecked) {
-            headContent = `    <meta name="theme-color" content="${metaHex}">`;
-        }
-
-        let bodyStyle = '';
-        if (bodyHex && bodyChecked) {
-            bodyStyle = `background-color: ${bodyHex};`;
-        }
-
-        const bdParts = [];
-        const bdSaturate = document.getElementById("test-backdrop-enabled");
-        const bdBlur     = document.getElementById("test-blur-enabled");
-        const bdOpacity  = document.getElementById("test-bdopacity-enabled");
-        if (bdSaturate && bdSaturate.checked) bdParts.push('saturate(100%)');
-        if (bdBlur     && bdBlur.checked)     bdParts.push('blur(0px)');
-        if (bdOpacity  && bdOpacity.checked)  bdParts.push('opacity(1)');
-
-        let divStyle = 'position: fixed; top: 0;';
-        if (fixedHex) {
-            divStyle += ` background-color: ${fixedHex};`;
-        }
-        if (bdParts.length) {
-            divStyle += ` backdrop-filter: ${bdParts.join(' ')};`;
-        }
-        if (!fixedChecked) {
-            divStyle += ' display: none;';
-        }
-
-        const codeExample = `<head>
-${headContent || ''}
-</head>
-<body${bodyStyle ? ` style="${bodyStyle}"` : ''}>
-    <div style="${divStyle}">
-    </div>
-</body>`;
-
-        // Update the code block
-        if (codeGenExample) {
-            codeGenExample.textContent = codeExample;
-            delete codeGenExample.dataset.highlighted;
-            hljs.highlightElement(codeGenExample);
-        }
-    };
-
-    const updateBodyColors = (hexColor, applyStyle = true) => {
-        // Get the current input value and checkbox state
-        const inputValue = document.getElementById("color-picker-body").value;
-        const isChecked = bodyCheckbox && bodyCheckbox.checked;
-        const hex = inputValue && inputValue !== 'inherit' ? normalizeColor(inputValue) : null;
-
-        // Apply styles to page if checkbox is checked
-        if (isChecked && hex) {
-            document.body.style.backgroundColor = hex;
-
-            const useDarkThemeWithLightText = selectThemeWithLuma(hex);
-            document.body.classList.toggle('dark-theme', useDarkThemeWithLightText);
-            document.body.classList.toggle('light-theme', !useDarkThemeWithLightText);
-
-            if (highlightJsLightTheme && highlightJsDarkTheme) {
-                if (useDarkThemeWithLightText) {
-                    highlightJsLightTheme.disabled = true;
-                    highlightJsDarkTheme.disabled = false;
-                } else {
-                    highlightJsLightTheme.disabled = false;
-                    highlightJsDarkTheme.disabled = true;
-                }
-            }
-        } else {
-            // Don't apply color to page
-            document.body.style.backgroundColor = '';
-
-            // Apply theme based on white background
-            const useDarkThemeWithLightText = selectThemeWithLuma('#FFFFFF');
-            document.body.classList.toggle('dark-theme', useDarkThemeWithLightText);
-            document.body.classList.toggle('light-theme', !useDarkThemeWithLightText);
-
-            if (highlightJsLightTheme && highlightJsDarkTheme) {
-                if (useDarkThemeWithLightText) {
-                    highlightJsLightTheme.disabled = true;
-                    highlightJsDarkTheme.disabled = false;
-                } else {
-                    highlightJsLightTheme.disabled = false;
-                    highlightJsDarkTheme.disabled = true;
-                }
-            }
-        }
-        updateURLParams();
-        updateGeneratedCode();
-    };
-
-    const updateMetaColors = (hexColor, applyStyle = true) => {
-        // Get the current input value
-        const inputValue = document.getElementById("color-picker-meta").value;
-        const hex = inputValue && inputValue !== 'inherit' ? normalizeColor(inputValue) : null;
-
-        // Only update if tag exists in DOM and we have a valid color
-        const metaTag = document.querySelector('meta[name="theme-color"]');
-        if (metaTag && applyStyle && hexColor && hexColor.trim() !== '') {
-            const colorToApply = normalizeColor(hexColor);
-            metaTag.content = colorToApply;
-        } else if (metaTag && (!hexColor || hexColor.trim() === '')) {
-            metaTag.content = '';
-        }
-
-        updateURLParams();
-        updateGeneratedCode();
-    };
-
-    const updateFixedColors = (hexColor, applyStyle = true) => {
-        // Get the current input value
-        const inputValue = document.getElementById("color-picker-fixed").value;
-        const hex = inputValue && inputValue !== 'inherit' ? normalizeColor(inputValue) : null;
-
-        // Always apply backgroundColor when there's a valid color
-        if (applyStyle && hexColor && hexColor.trim() !== '') {
-            const colorToApply = normalizeColor(hexColor);
-            if (fixedTopElement) {
-                fixedTopElement.style.backgroundColor = colorToApply;
-            }
-            if (fixedBottomElement) {
-                fixedBottomElement.style.backgroundColor = colorToApply;
-            }
-        } else {
-            // Clear backgroundColor when no color
-            if (fixedTopElement) {
-                fixedTopElement.style.backgroundColor = '';
-            }
-            if (fixedBottomElement) {
-                fixedBottomElement.style.backgroundColor = '';
-            }
-        }
-
-        updateURLParams();
-        updateGeneratedCode();
-        document.dispatchEvent(new CustomEvent("fixedColorUpdated"));
-    };
-
-    // Define fixed and meta change handlers at module scope so they can be reused
-    const handleFixedChange = function(e) {
-        console.log('handleFixedChange called, value:', e.target.value, 'fixedColorPicker:', !!fixedColorPicker);
-        ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('visible');
-        });
-        isUpdatingFixed = true;
-        const value = e.target.value;
-        // Allow empty values - just clear and don't set to "inherit"
-        if (!value || value.trim() === '') {
-            fixedLastValue = '';
-            e.target.value = '';
-            // Only update if checkbox is checked
-            if (fixedCheckbox && fixedCheckbox.checked) {
-                updateFixedColors('');
-            }
-        } else {
-            const normalized = normalizeColor(value);
-            console.log('Normalized color:', normalized);
-            fixedLastValue = normalized;
-
-            // Always update the color picker widget to show the new color first
-            if (fixedColorPicker) {
-                console.log('Attempting to update fixedColorPicker');
-                try {
-                    fixedColorPicker.color = new ColorPicker.Color(normalized);
-                    fixedColorPicker.update();
-                    console.log('Successfully updated fixedColorPicker');
-                } catch (error) {
-                    console.error("Failed to update fixed color picker:", error);
-                }
-            } else {
-                console.error('fixedColorPicker is undefined!');
-            }
-
-            // Update URL params
-            updateURLParams();
-
-            // Only update actual colors if checkbox is checked
-            if (fixedCheckbox && fixedCheckbox.checked) {
-                updateFixedColors(normalized);
-            }
-        }
-        setTimeout(() => { isUpdatingFixed = false; }, 0);
-    };
-
-    const handleMetaChange = function(e) {
-        isUpdatingMeta = true;
-        const value = e.target.value;
-        // Allow empty values - just clear and don't set to "inherit"
-        if (!value || value.trim() === '') {
-            metaLastValue = '';
-            e.target.value = '';
-            // Only update if checkbox is checked
-            if (metaCheckbox && metaCheckbox.checked) {
-                updateMetaColors('');
-            }
-        } else {
-            const normalized = normalizeColor(value);
-            metaLastValue = normalized;
-
-            // Always update the color picker widget to show the new color first
-            if (metaColorPicker) {
-                try {
-                    metaColorPicker.color = new ColorPicker.Color(normalized);
-                    metaColorPicker.update();
-                } catch (error) {
-                    console.error("Failed to update meta color picker:", error);
-                }
-            }
-
-            // Update URL params
-            updateURLParams();
-
-            // Only update actual colors if checkbox is checked
-            if (metaCheckbox && metaCheckbox.checked) {
-                updateMetaColors(normalized);
-            }
-        }
-        setTimeout(() => { isUpdatingMeta = false; }, 0);
-    };
-
-    // Capture initial URL parameter values BEFORE initializing pickers
-    const urlParams = new URLSearchParams(window.location.search);
-    const capturedBodyParam = urlParams.get('b');
-    const capturedFixedParam = urlParams.get('f');
-    const capturedMetaParam = urlParams.get('m');
-
-    // Helper function to extract color from param
-    // New format: "08F" or "0088FF" (checked, implicit) or "0,08F" or "0,0088FF" (unchecked, explicit)
-    // Old format: "1,0088FF" (checked) or "0,0088FF" (unchecked)
-    const extractColorFromParam = (param) => {
-        if (!param || param.trim() === '' || param.toLowerCase() === 'false' || param.toLowerCase() === 'none') {
-            return '';
-        }
-        // Check if format includes comma (explicit checkbox state)
-        const parts = param.split(',');
-        if (parts.length === 2) {
-            const colorValue = parts[1].trim();
-            if (colorValue.match(/^[0-9a-fA-F]{3,6}$/)) {
-                // Expand 3-digit to 6-digit if needed
-                const expanded = expandHex(colorValue);
-                return `#${expanded}`;
-            }
-            return colorValue;
-        }
-        // No comma = implicit checked state, entire value is the color
-        if (param.match(/^[0-9a-fA-F]{3,6}$/)) {
-            // Expand 3-digit to 6-digit if needed
-            const expanded = expandHex(param);
-            return `#${expanded}`;
-        }
-        return param;
-    };
-
-    // Store initial values: URL param if exists and valid, otherwise use hardcoded defaults
-    const initialBodyColorValue = extractColorFromParam(capturedBodyParam) || '#0088FF';
-    const initialFixedColorValue = extractColorFromParam(capturedFixedParam) || '#FFCC33';
-    const initialMetaColorValue = extractColorFromParam(capturedMetaParam) || '#363636';
-
-    const initializeColorPickers = () => {
-        // Get checkbox elements
-        bodyCheckbox = document.getElementById("checkbox-body");
-        metaCheckbox = document.getElementById("checkbox-meta");
-        fixedCheckbox = document.getElementById("checkbox-fixed");
-
-        const bodyPickerInput = document.getElementById("color-picker-body");
-        // Normalize initial value (respects format - HEX or RGB)
-        bodyPickerInput.value = normalizeColor(bodyPickerInput.value);
-        bodyLastValue = bodyPickerInput.value;
-
-        // Set initial data-format based on value
-        if (isRgbFormat(bodyPickerInput.value)) {
-            bodyPickerInput.setAttribute('data-format', 'rgb');
-        } else {
-            bodyPickerInput.setAttribute('data-format', 'hex');
-        }
-
-        bodyColorPicker = new ColorPicker(bodyPickerInput, {
-            colorPresets: bootstrapColors,
-            colorKeywords: `#0088FF:default,${initialBodyColorValue}:initial`
-        });
-
-        const handleBodyChange = function(e) {
-            // Store the normalized value immediately
-            isUpdatingBody = true;
-            const value = e.target.value;
-
-            // Allow empty values - just clear and don't set to "inherit"
-            if (!value || value.trim() === '') {
-                bodyLastValue = '';
-                e.target.value = '';
-                // Only update if checkbox is checked
-                if (bodyCheckbox && bodyCheckbox.checked) {
-                    updateBodyColors('');
-                }
-
-                // Update fixed and meta pickers' complement colors to use default color
-                const defaultBodyColor = new ColorPicker.Color('#0088FF');
-                const newFixedTriadic = defaultBodyColor.clone().spin(180);
-                const newFixedTriadicHex = toHex6(newFixedTriadic);
-
-                if (fixedColorPicker) {
-                    const fixedPickerInput = document.getElementById("color-picker-fixed");
-                    const currentFixedValue = fixedPickerInput.value;
-                    fixedColorPicker.dispose();
-                    fixedColorPicker = new ColorPicker(fixedPickerInput, {
-                        colorPresets: bootstrapColors,
-                        colorKeywords: `#FFCC33:default,${initialFixedColorValue}:initial,${newFixedTriadicHex}:complement`
-                    });
-                    fixedPickerInput.value = currentFixedValue;
-                    if (currentFixedValue) {
-                        fixedColorPicker.color = new ColorPicker.Color(currentFixedValue);
-                        fixedColorPicker.update();
-                    }
-                    fixedPickerInput.addEventListener("colorpicker.change", handleFixedChange);
-                    fixedPickerInput.addEventListener("change", handleFixedChange);
-                }
-
-                if (metaColorPicker) {
-                    const metaPickerInput = document.getElementById("color-picker-meta");
-                    const currentMetaValue = metaPickerInput.value;
-                    metaColorPicker.dispose();
-
-                    const newTriadic = defaultBodyColor.clone().spin(180);
-                    const newTriadicHex = toHex6(newTriadic);
-
-                    const metaKeywords = `#363636:default,${initialMetaColorValue}:initial,${newTriadicHex}:complement`;
-
-                    metaColorPicker = new ColorPicker(metaPickerInput, {
-                        colorPresets: bootstrapColors,
-                        colorKeywords: metaKeywords
-                    });
-                    metaPickerInput.value = currentMetaValue;
-                    if (currentMetaValue) {
-                        metaColorPicker.color = new ColorPicker.Color(currentMetaValue);
-                        metaColorPicker.update();
-                    }
-                    metaPickerInput.addEventListener("colorpicker.change", handleMetaChange);
-                    metaPickerInput.addEventListener("change", handleMetaChange);
-                }
-
-                setTimeout(() => { isUpdatingBody = false; }, 0);
-                return;
-            }
-
-            const normalized = normalizeColor(value);
-            bodyLastValue = normalized;
-
-            // Update the color picker widget to show the new color first
-            if (bodyColorPicker) {
-                try {
-                    bodyColorPicker.color = new ColorPicker.Color(normalized);
-                    bodyColorPicker.update();
-                } catch (error) {
-                    console.error("Failed to update body color picker:", error);
-                }
-            }
-
-            // Only update if checkbox is checked
-            if (bodyCheckbox && bodyCheckbox.checked) {
-                updateBodyColors(normalized);
-            }
-
-            // Update fixed and meta pickers' complement colors in colorKeywords
-            const currentBodyColor = bodyColorPicker.color;
-            const newFixedTriadic = currentBodyColor.clone().spin(180);
-            const newFixedTriadicHex = toHex6(newFixedTriadic);
-
-            if (fixedColorPicker) {
-                // Dispose and recreate the fixed picker with new colorKeywords
-                // Fixed uses -120° complement
-                const fixedPickerInput = document.getElementById("color-picker-fixed");
-                const currentFixedValue = fixedPickerInput.value;
-                fixedColorPicker.dispose();
-                fixedColorPicker = new ColorPicker(fixedPickerInput, {
-                    colorPresets: bootstrapColors,
-                    colorKeywords: `#FFCC33:default,${initialFixedColorValue}:initial,${newFixedTriadicHex}:complement`
-                });
-                // Restore the value
-                fixedPickerInput.value = currentFixedValue;
-                fixedColorPicker.color = new ColorPicker.Color(currentFixedValue);
-                fixedColorPicker.update();
-
-                // Re-attach event handlers
-                fixedPickerInput.addEventListener("colorpicker.change", handleFixedChange);
-                fixedPickerInput.addEventListener("change", handleFixedChange);
-            }
-
-            if (metaColorPicker) {
-                // Dispose and recreate the meta picker with new colorKeywords
-                // Meta uses 120° complement instead of 180° complementary
-                const metaPickerInput = document.getElementById("color-picker-meta");
-                const currentMetaValue = metaPickerInput.value;
-                metaColorPicker.dispose();
-
-                const newTriadic = currentBodyColor.clone().spin(180);
-                const newTriadicHex = toHex6(newTriadic);
-
-                const metaKeywords = initialMetaColorValue
-                    ? `:default,${initialMetaColorValue}:initial,${newTriadicHex}:complement`
-                    : `:default,:initial,${newTriadicHex}:complement`;
-
-                metaColorPicker = new ColorPicker(metaPickerInput, {
-                    colorPresets: bootstrapColors,
-                    colorKeywords: metaKeywords
-                });
-                // Restore the value
-                metaPickerInput.value = currentMetaValue;
-                if (currentMetaValue) {
-                    metaColorPicker.color = new ColorPicker.Color(currentMetaValue);
-                    metaColorPicker.update();
-                }
-
-                // Re-attach event handlers
-                metaPickerInput.addEventListener("colorpicker.change", handleMetaChange);
-                metaPickerInput.addEventListener("change", handleMetaChange);
-            }
-
-            setTimeout(() => { isUpdatingBody = false; }, 0);
-        };
-
-        // Only listen to colorpicker.change (when using the visual picker)
-        bodyPickerInput.addEventListener("colorpicker.change", handleBodyChange);
-
-
-        // Use blur event to handle manual text input
-        // This fires when user clicks away or tabs out
-        bodyPickerInput.addEventListener("blur", function(e) {
-            const currentValue = e.target.value;
-
-            // If the value is "inherit", clear it - we don't want that
-            if (currentValue && currentValue.toLowerCase() === 'inherit') {
-                e.target.value = '';
-                return;
-            }
-
-            // Check for valid hex color only
-            if (currentValue && currentValue.match(/^#?[0-9a-fA-F]{3,8}$/)) {
-                // Trigger the change handler which will normalize and update everything
-                handleBodyChange(e);
-            }
-        });
-
-        const metaPickerInput = document.getElementById("color-picker-meta");
-        metaPickerInput.value = normalizeColor(metaPickerInput.value);
-        metaLastValue = metaPickerInput.value;
-
-        // Set initial data-format based on value
-        if (isRgbFormat(metaPickerInput.value)) {
-            metaPickerInput.setAttribute('data-format', 'rgb');
-        } else {
-            metaPickerInput.setAttribute('data-format', 'hex');
-        }
-
-        // META colorKeywords: default=#363636, initial=URL param or #363636, complement=120° from body
-        const metaKeywords = `#363636:default,${initialMetaColorValue}:initial,#0088FF:complement`;
-
-        metaColorPicker = new ColorPicker(metaPickerInput, {
-            colorPresets: bootstrapColors,
-            colorKeywords: metaKeywords
-        });
-
-        // Only listen to colorpicker.change (when using the visual picker)
-        metaPickerInput.addEventListener("colorpicker.change", handleMetaChange);
-
-        // Use blur event to handle manual text input
-        // This fires when user clicks away or tabs out
-        metaPickerInput.addEventListener("blur", function(e) {
-            const currentValue = e.target.value;
-
-            // If the value is "inherit", clear it - we don't want that
-            if (currentValue && currentValue.toLowerCase() === 'inherit') {
-                e.target.value = '';
-                return;
-            }
-
-            // Check for valid hex color only
-            if (currentValue && currentValue.match(/^#?[0-9a-fA-F]{3,8}$/)) {
-                // Trigger the change handler which will normalize and update everything
-                handleMetaChange(e);
-            }
-        });
-
-        const fixedPickerInput = document.getElementById("color-picker-fixed");
-        fixedPickerInput.value = normalizeColor(fixedPickerInput.value);
-        fixedLastValue = fixedPickerInput.value;
-
-        // Set initial data-format based on value
-        if (isRgbFormat(fixedPickerInput.value)) {
-            fixedPickerInput.setAttribute('data-format', 'rgb');
-        } else {
-            fixedPickerInput.setAttribute('data-format', 'hex');
-        }
-
-        // Note: Initial complement will be calculated after body color is synced from URL
-        // For now, use a placeholder that will be updated
-        fixedColorPicker = new ColorPicker(fixedPickerInput, {
-            colorPresets: bootstrapColors,
-            colorKeywords: `#FFCC33:default,${initialFixedColorValue}:initial,#0088FF:complement`
-        });
-
-        // Only listen to colorpicker.change (when using the visual picker)
-        fixedPickerInput.addEventListener("colorpicker.change", handleFixedChange);
-
-        // Use blur event to handle manual text input
-        // This fires when user clicks away or tabs out
-        fixedPickerInput.addEventListener("blur", function(e) {
-            const currentValue = e.target.value;
-
-            // If the value is "inherit", clear it - we don't want that
-            if (currentValue && currentValue.toLowerCase() === 'inherit') {
-                e.target.value = '';
-                return;
-            }
-
-            // Check for valid hex color only
-            if (currentValue && currentValue.match(/^#?[0-9a-fA-F]{3,8}$/)) {
-                // Trigger the change handler which will normalize and update everything
-                handleFixedChange(e);
-            }
-        });
-
-        // Add checkbox event listeners
-        bodyCheckbox.addEventListener("change", function() {
-            const currentValue = document.getElementById("color-picker-body").value;
-            // Always pass the current value - the function will handle checkbox state
-            updateBodyColors(currentValue);
-        });
-
-        metaCheckbox.addEventListener("change", function() {
-            if (!this.checked) {
-                // Remove meta tag from DOM entirely
-                const metaTag = document.querySelector('meta[name="theme-color"]');
-                if (metaTag && metaTag.parentNode) {
-                    metaTag.remove();
-                }
-            } else {
-                // Add meta tag to DOM if it doesn't exist
-                if (!document.querySelector('meta[name="theme-color"]')) {
-                    const meta = document.createElement('meta');
-                    meta.name = 'theme-color';
-                    const currentValue = document.getElementById("color-picker-meta").value;
-                    meta.content = normalizeColor(currentValue);
-                    document.head.appendChild(meta);
-                }
-            }
-            updateURLParams();
-            updateGeneratedCode();
-        });
-
-        fixedCheckbox.addEventListener("change", function() {
-            // Toggle display:none to show/hide fixed elements
-            if (!this.checked) {
-                if (fixedTopElement) fixedTopElement.style.display = 'none';
-                if (fixedBottomElement) fixedBottomElement.style.display = 'none';
-            } else {
-                if (fixedTopElement) fixedTopElement.style.removeProperty('display');
-                if (fixedBottomElement) fixedBottomElement.style.removeProperty('display');
-            }
-            ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('visible');
-            });
-            updateURLParams();
-            updateGeneratedCode();
-        });
-    };
-
-    // Define setInitialColorsFromURL before calling it
-    const setInitialColorsFromURL = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        let bodyColorParam = urlParams.get('b');
-        let metaColorParam = urlParams.get('m');
-        let fixedColorParam = urlParams.get('f');
-
-        // Set backdrop-filter disqualifier checkbox from bf param before any updateURLParams call
-        const bfInit = urlParams.get('bf');
-        const bdSatInit = document.getElementById("test-backdrop-enabled");
-        const bdBlurInit = document.getElementById("test-blur-enabled");
-        const bdOpInit   = document.getElementById("test-bdopacity-enabled");
-        if (bdSatInit)  bdSatInit.checked  = bfInit === 's';
-        if (bdBlurInit) bdBlurInit.checked  = bfInit === 'b';
-        if (bdOpInit)   bdOpInit.checked    = bfInit === 'o';
-
-        // Parse checkbox state and color
-        // New format: "08F" or "0088FF" (checked, implicit) or "0,08F" or "0,0088FF" (unchecked, explicit)
-        // Old format: "1,0088FF" (checked) or "0,0088FF" (unchecked)
-        const parseParam = (paramStr) => {
-            if (!paramStr || paramStr.trim() === '') return { checked: false, color: 'inherit' };
-
-            const parts = paramStr.split(',');
-            if (parts.length === 2) {
-                // Explicit checkbox state with comma
-                const checked = parts[0] === '1';
-                const colorValue = parts[1].trim();
-                if (!colorValue || colorValue === '') return { checked, color: 'inherit' };
-                if (colorValue.match(/^[0-9a-fA-F]{3,6}$/)) {
-                    // Expand 3-digit to 6-digit if needed
-                    const expanded = expandHex(colorValue);
-                    return { checked, color: `#${expanded}` };
-                }
-                return { checked, color: colorValue.toLowerCase() };
-            }
-
-            // No comma = implicit checked state (new format)
-            if (paramStr.toLowerCase() === 'false' || paramStr.toLowerCase() === 'none') return { checked: false, color: 'inherit' };
-            if (paramStr.match(/^[0-9a-fA-F]{3,6}$/)) {
-                // Expand 3-digit to 6-digit if needed
-                const expanded = expandHex(paramStr);
-                return { checked: true, color: `#${expanded}` };
-            } else if (paramStr.match(/^\d{1,3},\s*\d{1,3},\s*\d{1,3}$/)) {
-                return { checked: true, color: `rgb(${paramStr})` };
-            }
-            return { checked: true, color: paramStr.toLowerCase() };
-        };
-
-        const bodyParam = parseParam(bodyColorParam);
-        const metaParam = parseParam(metaColorParam);
-        const fixedParam = parseParam(fixedColorParam);
-
-        // Check if parameters are explicitly in the URL (not just null/missing)
-        const bodyParamExists = urlParams.has('b');
-        const metaParamExists = urlParams.has('m');
-        const fixedParamExists = urlParams.has('f');
-
-        // Count how many parameters are set to actual color values (not inherit, not false)
-        const paramsSet = [bodyParam.color, metaParam.color, fixedParam.color].filter(c => c !== 'inherit').length;
-
-        // Count how many parameters are explicitly present in URL (even if =false)
-        const paramsInURL = [bodyParamExists, metaParamExists, fixedParamExists].filter(p => p === true).length;
-
-        // Triadic color logic: if only one color is set AND other params are NOT in the URL
-        // (i.e., ?b=04F or ?b=0044FF should trigger complement, but ?b=04F&m=0,&f=0, should NOT)
-        // Fixed uses -120° (counterclockwise), Meta uses +120° (clockwise) from Body
-        if (paramsSet === 1 && paramsInURL === 1) {
-            if (bodyParam.color && bodyParam.color !== 'inherit') {
-                // Body is set: Fixed = Body-120°, Meta = Body+120°
-                const bodyColor = new ColorPicker.Color(bodyParam.color);
-                fixedParam.color = toHex6(bodyColor.clone().spin(180));
-                fixedParam.checked = true;
-                metaParam.color = toHex6(bodyColor.clone().spin(180));
-                metaParam.checked = true;
-            } else if (fixedParam.color && fixedParam.color !== 'inherit') {
-                // Fixed is set: Body = Fixed+120°, Meta = Fixed+240° (or Fixed-120°)
-                const fixedColor = new ColorPicker.Color(fixedParam.color);
-                bodyParam.color = toHex6(fixedColor.clone().spin(180));
-                bodyParam.checked = true;
-                metaParam.color = toHex6(fixedColor.clone().spin(180));
-                metaParam.checked = true;
-            } else if (metaParam.color && metaParam.color !== 'inherit') {
-                // Meta is set: Body = Meta-120°, Fixed = Meta-240° (or Meta+120°)
-                const metaColor = new ColorPicker.Color(metaParam.color);
-                bodyParam.color = toHex6(metaColor.clone().spin(180));
-                bodyParam.checked = true;
-                fixedParam.color = toHex6(metaColor.clone().spin(180));
-                fixedParam.checked = true;
-            }
-        }
-
-        if (bodyParamExists) {
-            // URL param exists
-            try {
-                document.getElementById("color-picker-body").value = bodyParam.color !== 'inherit' ? bodyParam.color : "inherit";
-                if (bodyCheckbox) bodyCheckbox.checked = bodyParam.checked;
-            } catch (e) {
-                console.error("Failed to set body color from URL:", e);
-            }
-        } else {
-            // No param in URL - set default body color
-            try {
-                document.getElementById("color-picker-body").value = "#0088FF";
-                if (bodyCheckbox) bodyCheckbox.checked = true;
-            } catch (e) {
-                console.error("Failed to set default body color:", e);
-            }
-        }
-
-        if (metaParamExists) {
-            // URL param exists
-            try {
-                document.getElementById("color-picker-meta").value = metaParam.color !== 'inherit' ? metaParam.color : "inherit";
-                if (metaCheckbox) metaCheckbox.checked = metaParam.checked;
-            } catch (e) {
-                console.error("Failed to set meta color from URL:", e);
-            }
-        } else {
-            // No meta param in URL - use default color and uncheck checkbox
-            try {
-                document.getElementById("color-picker-meta").value = "#363636";
-                if (metaCheckbox) metaCheckbox.checked = false;
-            } catch (e) {
-                console.error("Failed to set default meta color:", e);
-            }
-        }
-
-        if (fixedParamExists) {
-            // URL param exists
-            try {
-                document.getElementById("color-picker-fixed").value = fixedParam.color !== 'inherit' ? fixedParam.color : "inherit";
-                if (fixedCheckbox) fixedCheckbox.checked = fixedParam.checked;
-            } catch (e) {
-                console.error("Failed to set fixed color from URL:", e);
-            }
-        } else {
-            // No fixed param in URL - set default value and check by default
-            try {
-                document.getElementById("color-picker-fixed").value = "#FFCC33";
-                if (fixedCheckbox) fixedCheckbox.checked = true;
-            } catch (e) {
-                console.error("Failed to set default fixed color:", e);
-            }
-        }
-    };
-
-    // Call initializeColorPickers after DOMContentLoaded
-    initializeColorPickers();
-
-    // Set initial colors from URL AFTER initializing pickers
-    // then update the pickers to reflect the new values
-    setInitialColorsFromURL();
-
-    // Set fixed elements display based on initial checkbox state
-    if (fixedCheckbox && !fixedCheckbox.checked) {
-        if (fixedTopElement) fixedTopElement.style.display = 'none';
-        if (fixedBottomElement) fixedBottomElement.style.display = 'none';
+    if (!tag) {
+        tag = Object.assign(document.createElement('meta'), { name: 'theme-color' });
+        document.head.append(tag);
+    }
+    if (tag.content !== state.meta.color) tag.content = state.meta.color;
+};
+
+// Both fixed bars get the same options; the bottom bar can also be hidden
+const renderBars = () => {
+    const color = state.fixed.color;
+    const t = state.technique;
+    for (const bar of bars) {
+        setStyle(bar, 'display', !state.fixed.on || state.hide === 'display' ? 'none' : '');
+        setStyle(bar, 'background-color', color);
+        setStyle(bar, 'backdrop-filter', BACKDROP[t] || '');
+        setStyle(bar, '-webkit-backdrop-filter', BACKDROP[t] || '');
+        setStyle(bar, 'opacity', state.hide === 'opacity' ? '0' : '');
+        setStyle(bar, 'visibility', state.hide === 'hidden' ? 'hidden' : '');
+    }
+    // Hidden bars: 12px tall, full width, moved past the edge so only a sliver
+    // in the tint color stays on screen, next to Safari's status bar and toolbar
+    const offscreen = state.hide === 'offscreen';
+    for (const [bar, side, narrow] of [[topBar, 'top', state.hiddenTop], [bottomBar, 'bottom', state.hiddenBottom]]) {
+        const offset = offscreen ? OFFSCREEN_OFFSET : narrow ? HIDDEN_OFFSET[side] : null;
+        setStyle(bar, side, offset === null ? '' : `${offset}px`);
+        setStyle(bar, 'min-height', offset === null ? '' : `${HIDDEN_BAR_HEIGHT}px`);
+        setStyle(bar, 'height', offset === null ? '' : `${HIDDEN_BAR_HEIGHT}px`);
+        setStyle(bar, 'width', offset === null ? '' : '100%');
     }
 
-    // Force update all pickers after URL values are applied
-    // Use the Color class to parse the input value and set picker color
-    if (bodyColorPicker) {
-        const bodyInputValue = document.getElementById("color-picker-body").value;
-        if (bodyInputValue && bodyInputValue !== '') {
-            bodyColorPicker.color = new ColorPicker.Color(bodyInputValue);
-            bodyColorPicker.update();
-
-            // Update fixed and meta pickers' complement colors after body color is set from URL
-            const currentBodyColor = bodyColorPicker.color;
-            const newFixedTriadic = currentBodyColor.clone().spin(180);
-            const newFixedTriadicHex = toHex6(newFixedTriadic);
-
-            if (fixedColorPicker) {
-                // Dispose and recreate the fixed picker with new colorKeywords
-                // Fixed uses -120° complement
-                const fixedPickerInput = document.getElementById("color-picker-fixed");
-                const currentFixedValue = fixedPickerInput.value;
-                fixedColorPicker.dispose();
-                fixedColorPicker = new ColorPicker(fixedPickerInput, {
-                    colorPresets: bootstrapColors,
-                    colorKeywords: `#FFCC33:default,${initialFixedColorValue}:initial,${newFixedTriadicHex}:complement`
-                });
-                // Restore the value and re-attach event handlers
-                fixedPickerInput.value = currentFixedValue;
-                fixedColorPicker.color = new ColorPicker.Color(currentFixedValue);
-                fixedColorPicker.update();
-
-                // handleFixedChange is already defined earlier
-                fixedPickerInput.addEventListener("colorpicker.change", handleFixedChange);
-            }
-
-            if (metaColorPicker) {
-                // Dispose and recreate the meta picker with new colorKeywords
-                // Meta uses 120° complement instead of 180° complementary
-                const metaPickerInput = document.getElementById("color-picker-meta");
-                const currentMetaValue = metaPickerInput.value;
-                metaColorPicker.dispose();
-
-                const newTriadic = currentBodyColor.clone().spin(180);
-                const newTriadicHex = toHex6(newTriadic);
-
-                const metaKeywords = initialMetaColorValue
-                    ? `:default,${initialMetaColorValue}:initial,${newTriadicHex}:complement`
-                    : `:default,:initial,${newTriadicHex}:complement`;
-
-                metaColorPicker = new ColorPicker(metaPickerInput, {
-                    colorPresets: bootstrapColors,
-                    colorKeywords: metaKeywords
-                });
-                // Restore the value and re-attach event handlers
-                metaPickerInput.value = currentMetaValue;
-                if (currentMetaValue) {
-                    metaColorPicker.color = new ColorPicker.Color(currentMetaValue);
-                    metaColorPicker.update();
-                }
-
-                // handleMetaChange is already defined earlier
-                metaPickerInput.addEventListener("colorpicker.change", handleMetaChange);
-            }
-        }
+    // On-screen note for each bar: off, Narrow or Hidden
+    const hidden = state.fixed.on && !!state.hide;
+    for (const [pill, arrow, narrow] of [[el.topIndicator, '↑', state.hiddenTop], [el.bottomIndicator, '↓', state.hiddenBottom]]) {
+        const label = hidden ? 'Hidden' : narrow ? 'Narrow' : '';
+        pill.hidden = !label;
+        pill.textContent = label ? `${arrow} ${label} Element Enabled` : '';
+        pill.parentElement.classList.toggle('on-dark', pageIsDark());
     }
-    if (metaColorPicker) {
-        const metaInputValue = document.getElementById("color-picker-meta").value;
-        if (metaInputValue && metaInputValue !== '') {
-            metaColorPicker.color = new ColorPicker.Color(metaInputValue);
-            metaColorPicker.update();
-        }
+};
+
+// Example code for the current options (the code block scrolls; height is fixed)
+const renderCode = () => {
+    if (!el.code) return;
+    const color = state.fixed.color;
+    const t = state.technique;
+    const css = ['.fixed-bar { position: fixed; left: 0; width: 90%; min-height: 15px; }'];
+    const lines = ['<head>'];
+    if (state.meta.on) lines.push(`  <meta name="theme-color" content="${state.meta.color}">`);
+    lines.push(...css.map((rule) => `  <style>${rule}</style>`), '</head>',
+        `<body${state.body.on ? ` style="background-color: ${state.body.color};"` : ''}>`);
+
+    if (state.fixed.on) {
+        const props = [`background-color: ${color};`];
+        if (BACKDROP[t]) props.push(`backdrop-filter: ${BACKDROP[t]};`);
+        if (state.hide === 'opacity') props.push('opacity: 0;');
+        if (state.hide === 'hidden') props.push('visibility: hidden;');
+        if (state.hide === 'display') props.push('display: none;');
+        const size = ` width: 100%; min-height: ${HIDDEN_BAR_HEIGHT}px;`;
+        const offscreen = state.hide === 'offscreen';
+        const top = offscreen ? `top: ${OFFSCREEN_OFFSET}px;${size}` : state.hiddenTop ? `top: ${HIDDEN_OFFSET.top}px;${size}` : 'top: 4px;';
+        const bottom = offscreen ? `bottom: ${OFFSCREEN_OFFSET}px;${size}` : state.hiddenBottom ? `bottom: ${HIDDEN_OFFSET.bottom}px;${size}` : 'bottom: 3px;';
+        lines.push(`  <div id="top-bar" class="fixed-bar" style="${top} ${props.join(' ')}"></div>`,
+            `  <div id="bottom-bar" class="fixed-bar" style="${bottom} ${props.join(' ')}"></div>`);
     }
-    if (fixedColorPicker) {
-        const fixedInputValue = document.getElementById("color-picker-fixed").value;
-        if (fixedInputValue && fixedInputValue !== '') {
-            fixedColorPicker.color = new ColorPicker.Color(fixedInputValue);
-            fixedColorPicker.update();
-        }
+    lines.push('</body>');
+
+    el.code.textContent = lines.join('\n');
+    delete el.code.dataset.highlighted;
+    if (window.hljs) hljs.highlightElement(el.code);
+};
+
+const render = () => {
+    renderControls();
+    renderBody();
+    renderMeta();
+    renderBars();
+    remountBars();
+    renderCode();
+    saveSession();
+    saveColors();
+};
+
+// A change that Safari may only pick up on reload: show the "↻ Reload" button.
+// Reloading keeps the options and the scroll position (sessionStorage).
+const reloadButton = $('reload-button');
+const showRefreshHint = () => { reloadButton.hidden = false; };
+reloadButton.addEventListener('click', () => {
+    saveSession();
+    location.reload();
+});
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+for (const name of ['body', 'fixed', 'meta']) {
+    // "input" fires live while the native picker is open
+    picker[name].addEventListener('input', () => {
+        const color = parseHex(picker[name].value);
+        if (!color) return;
+        state[name].color = color;
+        if (name === 'body') renderPresets();
+        if (name === 'fixed') showRefreshHint(picker[name]);
+        render();
+    });
+    checkbox[name].addEventListener('change', () => {
+        state[name].on = checkbox[name].checked;
+        if (name === 'fixed') showRefreshHint(checkbox[name]);
+        render();
+    });
+}
+
+// Each group allows one option at a time: checking one clears the others
+for (const group of ['technique', 'hide']) {
+    for (const box of groupBoxes(group)) {
+        box.addEventListener('change', () => {
+            state[group] = box.checked ? box.value : '';
+            // Off screen replaces the Narrow options
+            if (state.hide === 'offscreen') state.hiddenTop = state.hiddenBottom = false;
+            showRefreshHint(box);
+            render();
+        });
     }
+}
 
-    // Apply initial colors and generate code on page load
-    // Call update functions which will:
-    // 1. Always generate code with current input values
-    // 2. Only apply styles if checkbox is checked
+hiddenTopBox.addEventListener('change', () => {
+    state.hiddenTop = hiddenTopBox.checked;
+    if (state.hiddenTop && state.hide === 'offscreen') state.hide = '';
+    showRefreshHint(hiddenTopBox);
+    render();
+});
+hiddenBottomBox.addEventListener('change', () => {
+    state.hiddenBottom = hiddenBottomBox.checked;
+    if (state.hiddenBottom && state.hide === 'offscreen') state.hide = '';
+    showRefreshHint(hiddenBottomBox);
+    render();
+});
 
-    const bodyValue = document.getElementById("color-picker-body").value;
-    updateBodyColors(bodyValue);
 
-    const metaValue = document.getElementById("color-picker-meta").value;
-    updateMetaColors(metaValue);
-
-    const fixedValue = document.getElementById("color-picker-fixed").value;
-    updateFixedColors(fixedValue);
-
-    // Initialize highlight.js after initial colors are set
-    hljs.highlightAll();
-
-    // Apply highlight.js to generated code block if it has content
-    if (codeGenExample && codeGenExample.textContent.trim() !== '') {
-        delete codeGenExample.dataset.highlighted;
-        hljs.highlightElement(codeGenExample);
+// Share and Copy build the URL from the state when used
+const copyText = async (text) => {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch {
+        const area = Object.assign(document.createElement('textarea'), { value: text });
+        area.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+        document.body.append(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
     }
+};
 
-    // Fallback function for copying to clipboard in non-secure contexts
-    // MUST be defined BEFORE Share and Copy buttons that use it
-    const copyToClipboardFallback = (text) => {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
+$('shareButton')?.addEventListener('click', async () => {
+    const url = urlFromState(state);
+    if (navigator.share && window.isSecureContext) {
         try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                console.log('URL copied to clipboard (fallback):', text);
-            } else {
-                console.error('Fallback copy failed');
-            }
+            await navigator.share({ url });
         } catch (error) {
-            console.error('Fallback copy error:', error);
+            if (error.name !== 'AbortError') copyText(url);
         }
-
-        document.body.removeChild(textArea);
-    };
-
-    // Share Button Logic
-    const shareButton = document.getElementById("shareButton");
-    if (shareButton) {
-        shareButton.addEventListener("click", () => {
-            // Get hex values and checkbox states
-            const bodyPickerValue = document.getElementById("color-picker-body").value;
-            let bodyColorHex = (bodyPickerValue && bodyPickerValue !== 'inherit') ? expandHex(bodyPickerValue.substring(1)) : '';
-            const bodyChecked = bodyCheckbox ? bodyCheckbox.checked : true;
-
-            const metaPickerValue = document.getElementById("color-picker-meta").value;
-            let metaColorHex = (metaPickerValue && metaPickerValue !== 'inherit') ? expandHex(metaPickerValue.substring(1)) : '';
-            const metaChecked = metaCheckbox ? metaCheckbox.checked : false;
-
-            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-            let fixedColorHex = (fixedPickerValue && fixedPickerValue !== 'inherit') ? expandHex(fixedPickerValue.substring(1)) : '';
-            const fixedChecked = fixedCheckbox ? fixedCheckbox.checked : false;
-
-            // New format: omit "1," prefix when checked (implicit), add "0," when unchecked
-            const bodyParam = bodyChecked ? bodyColorHex : `0,${bodyColorHex}`;
-            const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
-            const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
-
-            const bdS = document.getElementById("test-backdrop-enabled");
-            const bdB = document.getElementById("test-blur-enabled");
-            const bdO = document.getElementById("test-bdopacity-enabled");
-            const bfP = (bdS && bdS.checked) ? 's' : (bdB && bdB.checked) ? 'b' : (bdO && bdO.checked) ? 'o' : '';
-            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfP ? `&bf=${bfP}` : ''}`;
-            const shareUrl = window.location.origin + window.location.pathname + queryString;
-
-            console.log('Share button clicked');
-            console.log('navigator.share available:', !!navigator.share);
-            console.log('Share URL:', shareUrl);
-
-            // Check if Web Share API is available (requires secure context: https or localhost)
-            if (navigator.share && window.isSecureContext) {
-                const shareData = { url: shareUrl };
-
-                navigator.share(shareData)
-                    .then(() => {
-                        console.log('Share successful');
-                    })
-                    .catch((error) => {
-                        console.log('Share error:', error.name, error.message);
-                        // If share fails and it's not because user cancelled, use fallback
-                        if (error.name !== 'AbortError') {
-                            copyToClipboardFallback(shareUrl);
-                        }
-                    });
-            } else {
-                // No Web Share API or not secure context, use clipboard fallback
-                console.log('Web Share API not available, using clipboard fallback');
-                copyToClipboardFallback(shareUrl);
-            }
-        });
-    }
-
-    // Copy Button Logic
-    const copyButton = document.getElementById("copyButton");
-    if (copyButton) {
-        copyButton.addEventListener("click", async () => {
-            console.log('bodyColorPicker value:', document.getElementById("color-picker-body").value);
-            console.log('metaColorPicker value:', document.getElementById("color-picker-meta").value);
-            console.log('fixedColorPicker value:', document.getElementById("color-picker-fixed").value);
-
-            // Get hex values and checkbox states
-            const bodyPickerValue = document.getElementById("color-picker-body").value;
-            let bodyColorHex = (bodyPickerValue && bodyPickerValue !== 'inherit') ? expandHex(bodyPickerValue.substring(1)) : '';
-            const bodyChecked = bodyCheckbox ? bodyCheckbox.checked : true;
-
-            const metaPickerValue = document.getElementById("color-picker-meta").value;
-            let metaColorHex = (metaPickerValue && metaPickerValue !== 'inherit') ? expandHex(metaPickerValue.substring(1)) : '';
-            const metaChecked = metaCheckbox ? metaCheckbox.checked : false;
-
-            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-            let fixedColorHex = (fixedPickerValue && fixedPickerValue !== 'inherit') ? expandHex(fixedPickerValue.substring(1)) : '';
-            const fixedChecked = fixedCheckbox ? fixedCheckbox.checked : false;
-
-            console.log('Copy Button Clicked:');
-            console.log('bodyColorHex:', bodyColorHex, 'bodyChecked:', bodyChecked);
-            console.log('metaColorHex:', metaColorHex, 'metaChecked:', metaChecked);
-            console.log('fixedColorHex:', fixedColorHex, 'fixedChecked:', fixedChecked);
-
-            // New format: omit "1," prefix when checked (implicit), add "0," when unchecked
-            const bodyParam = bodyChecked ? bodyColorHex : `0,${bodyColorHex}`;
-            const fixedParam = fixedChecked ? fixedColorHex : `0,${fixedColorHex}`;
-            const metaParam = metaChecked ? metaColorHex : `0,${metaColorHex}`;
-
-            const bdS2 = document.getElementById("test-backdrop-enabled");
-            const bdB2 = document.getElementById("test-blur-enabled");
-            const bdO2 = document.getElementById("test-bdopacity-enabled");
-            const bfP2 = (bdS2 && bdS2.checked) ? 's' : (bdB2 && bdB2.checked) ? 'b' : (bdO2 && bdO2.checked) ? 'o' : '';
-            const queryString = `?b=${bodyParam}&f=${fixedParam}&m=${metaParam}${bfP2 ? `&bf=${bfP2}` : ''}`;
-            const copyUrl = window.location.origin + window.location.pathname + queryString;
-            console.log('Copy URL:', copyUrl);
-
-            // Try modern Clipboard API first, fallback to legacy method
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                try {
-                    await navigator.clipboard.writeText(copyUrl);
-                    console.log('URL copied to clipboard:', copyUrl);
-                } catch (error) {
-                    console.error('Clipboard API failed:', error);
-                    // Fallback to legacy method
-                    copyToClipboardFallback(copyUrl);
-                }
-            } else {
-                // Fallback for non-secure contexts (http://)
-                copyToClipboardFallback(copyUrl);
-            }
-        });
-    }
-
-    // Disqualifier Test Controls
-    (() => {
-        const fixedEls = [
-            document.getElementById("fixed-top"),
-            document.getElementById("fixed-bottom"),
-        ].filter(Boolean);
-
-        const backdropEnabled   = document.getElementById("test-backdrop-enabled");
-        const blurEnabled       = document.getElementById("test-blur-enabled");
-        const bdOpacityEnabled  = document.getElementById("test-bdopacity-enabled");
-
-        if (!backdropEnabled) return; // card not present
-
-        const showRefreshHints = () => {
-            ['fixed-refresh-hint', 'disqualifier-refresh-hint'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('visible');
-            });
-        };
-
-        const applyDisqualifiers = () => {
-            let bdStr = '';
-            if (backdropEnabled.checked)  bdStr = 'saturate(100%)';
-            else if (blurEnabled.checked) bdStr = 'blur(0px)';
-            else if (bdOpacityEnabled && bdOpacityEnabled.checked) bdStr = 'opacity(1)';
-
-            fixedEls.forEach(el => {
-                el.style.backdropFilter = bdStr;
-                el.style.webkitBackdropFilter = bdStr;
-            });
-
-            updateURLParams();
-            updateGeneratedCode();
-        };
-
-        applyDisqualifiers();
-
-        const checkboxes = [backdropEnabled, blurEnabled];
-        if (bdOpacityEnabled) checkboxes.push(bdOpacityEnabled);
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener("change", () => {
-                // Mutual exclusion — uncheck the others
-                if (cb.checked) {
-                    checkboxes.forEach(other => {
-                        if (other !== cb) other.checked = false;
-                    });
-                }
-                applyDisqualifiers();
-                showRefreshHints();
-            });
-        });
-
-        // Re-apply when the color picker updates the fixed element's background
-        document.addEventListener("fixedColorUpdated", applyDisqualifiers);
-    })();
-
-    // Hidden Tinting Element Controls
-    (() => {
-        const hiddenTintEl = document.getElementById("hidden-tint-element");
-        const hiddenTintEnabled = document.getElementById("test-hidden-tint-enabled");
-        const hiddenTintOffset = document.getElementById("hidden-tint-offset");
-        const hiddenTintOffsetLabel = document.getElementById("hidden-tint-offset-label");
-        const hiddenTintRefresh = document.getElementById("hidden-tint-refresh-hint");
-
-        if (!hiddenTintEnabled || !hiddenTintEl) return;
-
-        const getFixedColor = () => {
-            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
-        };
-
-        const applyHiddenTint = () => {
-            if (hiddenTintEnabled.checked) {
-                hiddenTintEl.style.display = '';
-                hiddenTintEl.style.backgroundColor = getFixedColor();
-                const offset = hiddenTintOffset.value;
-                hiddenTintEl.style.bottom = offset + 'px';
-                hiddenTintOffsetLabel.textContent = `bottom: ${offset}px`;
-                hiddenTintOffset.disabled = false;
-            } else {
-                hiddenTintEl.style.display = 'none';
-                hiddenTintEl.style.backgroundColor = '';
-                hiddenTintOffset.disabled = true;
-            }
-            if (hiddenTintRefresh) hiddenTintRefresh.classList.add('visible');
-        };
-
-        hiddenTintOffset.disabled = true;
-        hiddenTintEnabled.addEventListener("change", applyHiddenTint);
-        hiddenTintOffset.addEventListener("input", applyHiddenTint);
-        document.addEventListener("fixedColorUpdated", applyHiddenTint);
-    })();
-
-    // Bypass with Transparent Parent Controls
-    (() => {
-        const bypassEl = document.getElementById("bypass-element");
-        const bypassChild = document.getElementById("bypass-child");
-        const bypassDirect = document.getElementById("test-bypass-direct");
-        const bypassTransparent = document.getElementById("test-bypass-transparent");
-        const bypassRefresh = document.getElementById("bypass-refresh-hint");
-
-        if (!bypassDirect || !bypassEl) return;
-
-        const getFixedColor = () => {
-            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
-        };
-
-        const applyBypass = () => {
-            const color = getFixedColor();
-
-            if (bypassDirect.checked) {
-                // Direct background on fixed element — Safari samples this
-                bypassEl.style.display = '';
-                bypassEl.style.backgroundColor = color;
-                bypassChild.style.backgroundColor = '';
-            } else if (bypassTransparent.checked) {
-                // Transparent parent + absolute child — Safari skips this
-                bypassEl.style.display = '';
-                bypassEl.style.backgroundColor = 'transparent';
-                bypassChild.style.backgroundColor = color;
-            } else {
-                bypassEl.style.display = 'none';
-                bypassEl.style.backgroundColor = '';
-                bypassChild.style.backgroundColor = '';
-            }
-            if (bypassRefresh) bypassRefresh.classList.add('visible');
-        };
-
-        // Mutual exclusion
-        bypassDirect.addEventListener("change", () => {
-            if (bypassDirect.checked) bypassTransparent.checked = false;
-            applyBypass();
-        });
-        bypassTransparent.addEventListener("change", () => {
-            if (bypassTransparent.checked) bypassDirect.checked = false;
-            applyBypass();
-        });
-        document.addEventListener("fixedColorUpdated", applyBypass);
-    })();
-
-    // Visibility Methods Controls
-    (() => {
-        const fixedEls = [
-            document.getElementById("fixed-top"),
-            document.getElementById("fixed-bottom"),
-        ].filter(Boolean);
-
-        const visDisplayNone = document.getElementById("test-vis-display-none");
-        const visOpacityZero = document.getElementById("test-vis-opacity-zero");
-        const visHidden = document.getElementById("test-vis-hidden");
-        const visPointerNone = document.getElementById("test-vis-pointer-none");
-        const bdOpacityEnabled = document.getElementById("test-bdopacity-enabled");
-        const visRefresh = document.getElementById("visibility-refresh-hint");
-
-        if (!visDisplayNone) return;
-
-        const showRefreshHints = () => {
-            ['fixed-refresh-hint', 'disqualifier-refresh-hint', 'visibility-refresh-hint'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('visible');
-            });
-        };
-
-        const applyVisibility = () => {
-            fixedEls.forEach(el => {
-                // Reset all visibility-related styles first
-                el.style.removeProperty('opacity');
-                el.style.removeProperty('visibility');
-                el.style.removeProperty('pointer-events');
-
-                if (visDisplayNone.checked) {
-                    el.style.display = 'none';
-                } else {
-                    // Only restore display if fixed checkbox is checked
-                    const fixedCb = document.getElementById("checkbox-fixed");
-                    if (fixedCb && fixedCb.checked) {
-                        el.style.removeProperty('display');
-                    }
-                }
-
-                if (visOpacityZero.checked) {
-                    el.style.opacity = '0';
-                }
-
-                if (visHidden.checked) {
-                    el.style.visibility = 'hidden';
-                }
-
-                if (visPointerNone.checked) {
-                    el.style.pointerEvents = 'none';
-                }
-            });
-
-            // Handle backdrop-filter: opacity(1) — prevents sampling
-            if (bdOpacityEnabled.checked) {
-                fixedEls.forEach(el => {
-                    // Combine with existing backdrop-filter if any
-                    const current = el.style.backdropFilter || '';
-                    if (!current.includes('opacity(1)')) {
-                        el.style.backdropFilter = current ? current + ' opacity(1)' : 'opacity(1)';
-                        el.style.webkitBackdropFilter = el.style.backdropFilter;
-                    }
-                });
-            }
-
-            updateURLParams();
-            updateGeneratedCode();
-        };
-
-        [visDisplayNone, visOpacityZero, visHidden, visPointerNone, bdOpacityEnabled].forEach(cb => {
-            cb.addEventListener("change", () => {
-                applyVisibility();
-                showRefreshHints();
-            });
-        });
-
-        document.addEventListener("fixedColorUpdated", applyVisibility);
-    })();
-
-    // Pseudo-Element Exclusion Controls
-    (() => {
-        const pseudoEl = document.getElementById("pseudo-element");
-        const pseudoDirect = document.getElementById("test-pseudo-direct");
-        const pseudoBefore = document.getElementById("test-pseudo-before");
-        const pseudoAfter = document.getElementById("test-pseudo-after");
-        const pseudoRefresh = document.getElementById("pseudo-refresh-hint");
-
-        if (!pseudoDirect || !pseudoEl) return;
-
-        // We need a dynamic style element for pseudo-element colors
-        const pseudoStyle = document.createElement('style');
-        pseudoStyle.id = 'pseudo-element-style';
-        document.head.appendChild(pseudoStyle);
-
-        const getFixedColor = () => {
-            const fixedPickerValue = document.getElementById("color-picker-fixed").value;
-            return (fixedPickerValue && fixedPickerValue !== 'inherit') ? normalizeColor(fixedPickerValue) : '#FF7700';
-        };
-
-        const applyPseudo = () => {
-            const color = getFixedColor();
-
-            // Reset classes
-            pseudoEl.classList.remove('use-before', 'use-after');
-            pseudoEl.style.backgroundColor = '';
-            pseudoStyle.textContent = '';
-
-            if (pseudoDirect.checked) {
-                pseudoEl.style.display = '';
-                pseudoEl.style.backgroundColor = color;
-            } else if (pseudoBefore.checked) {
-                pseudoEl.style.display = '';
-                pseudoEl.classList.add('use-before');
-                pseudoStyle.textContent = `#pseudo-element.use-before::before { background-color: ${color}; }`;
-            } else if (pseudoAfter.checked) {
-                pseudoEl.style.display = '';
-                pseudoEl.classList.add('use-after');
-                pseudoStyle.textContent = `#pseudo-element.use-after::after { background-color: ${color}; }`;
-            } else {
-                pseudoEl.style.display = 'none';
-            }
-            if (pseudoRefresh) pseudoRefresh.classList.add('visible');
-        };
-
-        // Mutual exclusion
-        pseudoDirect.addEventListener("change", () => {
-            if (pseudoDirect.checked) {
-                pseudoBefore.checked = false;
-                pseudoAfter.checked = false;
-            }
-            applyPseudo();
-        });
-        pseudoBefore.addEventListener("change", () => {
-            if (pseudoBefore.checked) {
-                pseudoDirect.checked = false;
-                pseudoAfter.checked = false;
-            }
-            applyPseudo();
-        });
-        pseudoAfter.addEventListener("change", () => {
-            if (pseudoAfter.checked) {
-                pseudoDirect.checked = false;
-                pseudoBefore.checked = false;
-            }
-            applyPseudo();
-        });
-        document.addEventListener("fixedColorUpdated", applyPseudo);
-    })();
-
-    // Safari Version Check
-    const notSafariNotice = document.getElementById("not-safari-notice");
-    if (notSafariNotice) {
-        const isApple = navigator.vendor && navigator.vendor.indexOf("Apple") > -1 &&
-                        navigator.userAgent && navigator.userAgent.indexOf("Chrome") === -1 &&
-                        navigator.userAgent.indexOf("CriOS") === -1 &&
-                        navigator.userAgent.indexOf("FxiOS") === -1;
-
-        let safariVersion = 0;
-        const versionMatch = navigator.userAgent.match(/Version\/(\d+)/);
-        if (versionMatch && versionMatch[1]) {
-            safariVersion = parseInt(versionMatch[1]);
-        }
-
-        if (isApple && safariVersion >= 15) {
-            notSafariNotice.style.display = "none";
-        }
+    } else {
+        copyText(url);
     }
 });
+
+$('copyButton')?.addEventListener('click', () => copyText(urlFromState(state)));
+
+// Reset every option: forget the saved colors and options, then load the
+// page without parameters (a fresh load also clears Safari's top edge lock)
+$('resetButton')?.addEventListener('click', () => {
+    try {
+        localStorage.removeItem(COLORS_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
+    } catch { /* storage unavailable */ }
+    window.removeEventListener('pagehide', saveSession);
+    window.scrollTo(0, 0);
+    location.replace(location.pathname);
+});
+
+// ---------------------------------------------------------------------------
+// Static page setup
+// ---------------------------------------------------------------------------
+
+// Replace "›" in settings text with an SVG chevron
+const CHEVRON = '<svg style="position:relative;top:0.15em;" width="1em" height="1em" viewBox="0 0 16 16"><path fill="currentColor" d="M5.0 3.0 L10.2 8.0 L5.0 13.0 L6.4 14.4 L12.8 8.0 L6.4 1.6 Z"/></svg>';
+const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+const chevronNodes = [];
+while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('›')) chevronNodes.push(walker.currentNode);
+for (const node of chevronNodes) {
+    const span = document.createElement('span');
+    span.innerHTML = node.nodeValue.replace(/›/g, CHEVRON);
+    node.replaceWith(span);
+}
+
+// Hide the notice in Safari 15+
+const notice = $('not-safari-notice');
+const ua = navigator.userAgent;
+const safariVersion = Number((ua.match(/Version\/(\d+)/) || [])[1] || 0);
+if (notice && /Apple/.test(navigator.vendor) && !/Chrome|CriOS|FxiOS/.test(ua) && safariVersion >= 15) {
+    notice.style.display = 'none';
+}
+
+renderPresets();
+render();
+if (window.hljs) hljs.highlightAll();
+
+// Restore the scroll position of a reload, and keep it up to date
+if (session && Number.isFinite(session.scrollY)) {
+    window.scrollTo(0, session.scrollY);
+    window.addEventListener('load', () => window.scrollTo(0, session.scrollY), { once: true });
+}
+window.addEventListener('pagehide', saveSession);
+let scrollTimer = 0;
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(saveSession, 150);
+}, { passive: true });
+})();

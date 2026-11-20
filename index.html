@@ -5,11 +5,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Safari Color Tinting: Demo</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@thednp/color-picker@2/dist/css/color-picker.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark-dimmed.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@thednp/color-picker@2/dist/js/color-picker.min.js"></script>
 <meta property="og:title" content="Safari Color Tinting: Demo" />
 <meta property="og:image" content="https://safari-color-tinting.pages.dev/images/safari-macOS-26.png" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -23,16 +21,19 @@
 <meta property="og:url" content="https://safari-color-tinting.pages.dev" />
 <meta property="og:site_name" content="Andrew Escobar: notes" />
 <meta property="og:type" content="website" />
-<link rel="stylesheet" href="style.css?v=27">
-<meta name="theme-color" content="#FDFAE0">
+<link rel="stylesheet" href="style.css?v=58">
 </head>
 
 <body style="background-color: #0088FF;">
-    <div id="fixed-top"></div>
-    <div id="fixed-bottom"></div>
-    <div id="hidden-tint-element"></div>
-    <div id="bypass-element"><div id="bypass-child"></div></div>
-    <div id="pseudo-element"></div>
+    <div id="top-bar" class="fixed-bar"></div>
+    <div id="bottom-bar" class="fixed-bar"></div>
+    <div class="corner-stack top-stack">
+        <div id="top-indicator" class="corner-pill" hidden></div>
+    </div>
+    <div class="corner-stack">
+        <button type="button" id="reload-button" class="corner-pill" hidden>↻ Reload</button>
+        <div id="bottom-indicator" class="corner-pill" hidden></div>
+    </div>
 
 <h1><a href="/">Safari Color Tinting: Demo</a></h1>
 
@@ -41,176 +42,145 @@
     <div class="button-container">
     <button id="shareButton" class="action-button">Share</button>
     <button id="copyButton" class="action-button">Copy</button>
+    <button id="resetButton" class="action-button">Reset</button>
     </div>
+
 
 <!-- start .cards-flex-wrapper -->
 <div class="cards-flex-wrapper">
-<!-- first card-container for body background -->
     <div class="card-container">
         <h4 class="color-setting">Body Background</h4>
         <div class="color-picker-wrapper">
             <input type="checkbox" id="checkbox-body" class="color-checkbox" checked>
-            <div class="color-picker">
-                <input type="text" id="color-picker-body" class="color-preview btn-appearance" value="#0088FF" autocomplete="off" spellcheck="false" data-format="hex" data-color-keywords="red,orange,yellow,lime,green,blue,indigo,violet,pink,white,black">
-            </div>
+            <label class="color-picker">
+                <input type="color" id="color-picker-body" class="color-swatch" value="#0088ff">
+                <code class="color-hex" data-hex-for="color-picker-body">#0088FF</code>
+            </label>
         </div>
     </div>
-<!-- second card-container for fixed position background -->
     <div class="card-container" id="card-fixed">
         <h4 class="color-setting">Fixed Position Background</h4>
         <div class="color-picker-wrapper">
-            <input type="checkbox" id="checkbox-fixed" class="color-checkbox">
-            <div class="color-picker">
-                <input type="text" id="color-picker-fixed" class="color-preview btn-appearance" value="#FF7700" autocomplete="off" spellcheck="false" data-format="hex" data-color-keywords="red,orange,yellow,lime,green,blue,indigo,violet,pink,white,black">
-            </div>
+            <input type="checkbox" id="checkbox-fixed" class="color-checkbox" checked>
+            <label class="color-picker">
+                <input type="color" id="color-picker-fixed" class="color-swatch" value="#ffcc33">
+                <code class="color-hex" data-hex-for="color-picker-fixed">#FFCC33</code>
+            </label>
         </div>
-        <a id="fixed-refresh-hint" class="refresh-hint" href="">↻ reload</a>
     </div>
-<!-- third card-container for meta theme -->
     <div class="card-container">
         <h4 class="color-setting">Meta Theme Color</h4>
         <div class="color-picker-wrapper">
             <input type="checkbox" id="checkbox-meta" class="color-checkbox">
-            <div class="color-picker">
-                <input type="text" id="color-picker-meta" class="color-preview btn-appearance" value="#363636" autocomplete="off" spellcheck="false" data-format="hex" data-color-keywords="red,orange,yellow,lime,green,blue,indigo,violet,pink,white,black">
-            </div>
+            <label class="color-picker">
+                <input type="color" id="color-picker-meta" class="color-swatch" value="#363636">
+                <code class="color-hex" data-hex-for="color-picker-meta">#363636</code>
+            </label>
         </div>
     </div>
 </div>
 <!-- end .cards-flex-wrapper -->
 
-<!-- fourth card-container for generated code -->
+<!-- intro -->
+    <p class="intro">Safari tints its user interface to match the background color or a fixed element at the top or bottom edge. Learn more: <a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a></p>
+
+<!-- Safari settings help -->
+    <div class="card-container safari-settings">
+        <p>Users can enable or disable browser UI color tinting in Safari 26:<br /><br />
+        <b>macOS</b>: Safari › Settings › Tabs › Appearance: ✓ Show color in tab bar
+        <br /><br />
+        <b>iOS</b>: Settings › Apps › Safari › <nobr>Tabs: Allow Website Tinting ✓</nobr></p>
+    </div>
+
+
+<!-- fixed element without tint -->
+    <div class="card-container test-card">
+        <h4>Fixed Element Without Tinting</h4>
+        <p class="card-desc">A neutral <code class="inline-code">backdrop-filter</code> stops Safari from sampling the background color.</p>
+        <div class="test-options">
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="technique" value="saturate">
+                <code class="inline-code">backdrop-filter: saturate(100%)</code>
+            </label>
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="technique" value="blur">
+                <code class="inline-code">backdrop-filter: blur(0px)</code>
+            </label>
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="technique" value="opacity">
+                <code class="inline-code">backdrop-filter: opacity(1)</code>
+            </label>
+        </div>
+    </div>
+
+<!-- tint without a visible element -->
+    <div class="card-container test-card">
+        <h4>Tinting with a Minimal Fixed Element</h4>
+        <div class="test-options">
+            <label class="option-label test-option">
+                <input type="checkbox" id="hidden-top">
+                Narrow the top bar: 5px on screen
+            </label>
+            <pre class="option-code"><code class="nohighlight">#top-bar { position: fixed; top: -7px; left: 0; width: 100%; height: 12px; }</code></pre>
+            <label class="option-label test-option">
+                <input type="checkbox" id="hidden-bottom">
+                Narrow the bottom bar: 4px on screen
+            </label>
+            <pre class="option-code"><code class="nohighlight">#bottom-bar { position: fixed; bottom: -8px; left: 0; width: 100%; height: 12px; }</code></pre>
+        </div>
+    </div>
+
+<!-- hidden fixed elements -->
+    <div class="card-container test-card">
+        <h4>Hidden Fixed Elements</h4>
+        <p class="card-desc">Safari ignores a fixed element that is hidden:</p>
+        <div class="test-options">
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="hide" value="opacity">
+                <code class="inline-code">opacity: 0</code>
+            </label>
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="hide" value="hidden">
+                <code class="inline-code">visibility: hidden</code>
+            </label>
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="hide" value="display">
+                <code class="inline-code">display: none</code>
+            </label>
+            <label class="option-label test-option">
+                <input type="checkbox" data-group="hide" value="offscreen">
+                Both bars off screen: 0px
+            </label>
+            <pre class="option-code"><code class="nohighlight">#top-bar { position: fixed; top: -12px; left: 0; width: 100%; height: 12px; }
+#bottom-bar { position: fixed; bottom: -12px; left: 0; width: 100%; height: 12px; }</code></pre>
+        </div>
+    </div>
+
+<!-- child and pseudo-element -->
+    <div class="card-container test-card">
+        <h4>Child and Pseudo-Element</h4>
+        <p class="card-desc">A fixed element with a child or a <code class="inline-code">::before</code> on top has more than one color. Which one Safari uses:</p>
+        <a class="page-button" href="child-pseudo-element.html">Open Child and Pseudo-Element</a>
+    </div>
+
+<!-- scrim -->
+    <div class="card-container test-card">
+        <h4>Scrim</h4>
+        <p class="card-desc">A sheet or a dialog dims the page with a translucent scrim. Safari ignores the scrim. How to make the status bar and the toolbar match it:</p>
+        <a class="page-button" href="scrim.html">Open Scrim</a>
+    </div>
+
+<!-- generated code -->
     <div class="card-container">
         <h4 class="code-example">Example Code</h4>
         <code id="code-gen-example" class="language-html code-gen"></code>
-        <span class="learn-more">learn more: <a href="https://github.com/andesco/safari-color-tinting">andesco/safari-color-tinting</a></span>
-    </div>
-
-<!-- disqualifier test card -->
-    <div class="card-container disqualifier-test">
-        <h4>Prevent Sampling Fixed Position Elements</h4>
-        <p class="disqualifier-desc">Apply a neutral <code class="disqualifier-code">backdrop-filter</code> to a fixed position element to prevent Safari from sampling its background color.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-backdrop-enabled">
-                <code class="disqualifier-code">saturate(100%)</code>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-blur-enabled">
-                <code class="disqualifier-code">blur(0px)</code>
-            </label>
-        </div>
-        <a id="disqualifier-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-
-    </div>
-
-<!-- hidden tinting element card -->
-    <div class="card-container disqualifier-test">
-        <h4>Hidden Tinting Element</h4>
-        <p class="disqualifier-desc">A fixed element with <code class="disqualifier-code">bottom: -8px</code> and <code class="disqualifier-code">min-height: 12px</code> is sampled by Safari for toolbar tinting but is invisible to the user. Adjust the bottom offset to see when Safari stops sampling.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-hidden-tint-enabled">
-                Enable hidden tinting element
-            </label>
-        </div>
-        <div class="disqualifier-row" id="hidden-tint-offset-row">
-            <code class="disqualifier-code" id="hidden-tint-offset-label">bottom: -8px</code>
-            <input type="range" id="hidden-tint-offset" min="-20" max="10" value="-8" step="1">
-        </div>
-        <a id="hidden-tint-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
-
-<!-- bypass with transparent parent card -->
-    <div class="card-container disqualifier-test">
-        <h4>Bypass with Transparent Parent</h4>
-        <p class="disqualifier-desc">A fixed element with <code class="disqualifier-code">background-color: transparent</code> is invisible to Safari's algorithm. An <code class="disqualifier-code">position: absolute</code> child carries the visual styling, but Safari skips absolute children &mdash; so the toolbar tint falls through to the body background.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bypass-direct">
-                Direct background on fixed element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bypass-transparent">
-                Transparent parent + absolute child
-            </label>
-        </div>
-        <a id="bypass-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
-
-<!-- visibility methods card -->
-    <div class="card-container disqualifier-test">
-        <h4>Visibility Methods</h4>
-        <p class="disqualifier-desc">Which CSS visibility methods prevent Safari from sampling a fixed element? Only <code class="disqualifier-code">display: none</code> is reliable. The others still get sampled.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-vis-display-none">
-                <code class="disqualifier-code">display: none</code>
-                <span class="disqualifier-badge badge-prevents">prevents</span>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-vis-opacity-zero">
-                <code class="disqualifier-code">opacity: 0</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-vis-hidden">
-                <code class="disqualifier-code">visibility: hidden</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-vis-pointer-none">
-                <code class="disqualifier-code">pointer-events: none</code>
-                <span class="disqualifier-badge badge-sampled">still sampled</span>
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-bdopacity-enabled">
-                <code class="disqualifier-code">backdrop-filter: opacity(1)</code>
-                <span class="disqualifier-badge badge-prevents">prevents</span>
-            </label>
-        </div>
-        <a id="visibility-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
-
-<!-- pseudo-element exclusion card -->
-    <div class="card-container disqualifier-test">
-        <h4>Pseudo-Element Exclusion</h4>
-        <p class="disqualifier-desc"><code class="disqualifier-code">::before</code> and <code class="disqualifier-code">::after</code> pseudo-elements on fixed-position elements are NOT sampled by Safari's tinting algorithm. The background color from a pseudo-element is ignored.</p>
-
-        <div class="disqualifier-checkboxes">
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-direct">
-                Direct background on fixed element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-before">
-                Background via <code class="disqualifier-code">::before</code> pseudo-element
-            </label>
-            <label class="disqualifier-label">
-                <input type="checkbox" id="test-pseudo-after">
-                Background via <code class="disqualifier-code">::after</code> pseudo-element
-            </label>
-        </div>
-        <a id="pseudo-refresh-hint" class="refresh-hint" href="">↻ reload</a>
-    </div>
-
-<!-- fifth card-container for Safari How To -->
-    <div class="card-container safari-settings">
-        <p>Users can enable or disable browser UI color tinting in Safari 26:<br /><br />
-        <b>macOS</b>: Safari › Setting › Tabs › Appearance: ✓ Show color in tab bar
-        <br /><br />
-        <b>iOS</b>: Setting › Apps › Safari › <nobr>Tabs: Allow Website Tinting ✓</nobr>
     </div>
 
 <script src="luma.js?v=13"></script>
-<script src="script.js?v=13"></script>
+<script src="script.js?v=47"></script>
 
 <footer>
-    <p><a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a><br /><br />&copy; 2025 Andrew Escobar</p>
+    <p><a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a><br /><br /><a href="https://github.com/andesco/safari-color-tinting/blob/main/LICENSE">MIT License</a> · Andrew Escobar</p>
 </footer>
 
 </body>
