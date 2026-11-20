@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari Color Tinting: Scrim</title>
+<style>
+    :root {
+        --page: #0088ff;
+        /* Scrim: black at 20%, with a blur */
+        --scrim-color: #000000;
+        --scrim-opacity: 20%;
+        --surface: #ffffff;   /* sheet and dialog: white */
+        --surface-text: #111216;
+        /* The color the scrim shows over the page */
+        --scrim-edge-color: color-mix(in srgb, var(--scrim-color) var(--scrim-opacity), var(--page));
+    }
+
+    html, body { margin: 0; }
+
+    body {
+        background-color: var(--page);
+        color: #fff;
+        font: 1.0625rem/1.5 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        padding: 24px 16px 48px;
+    }
+
+    main { max-width: 34rem; margin: 0 auto; }
+    h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 0.75rem; }
+    h2 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem; }
+    p { margin: 0 0 1rem; }
+    a { color: #fff; }
+    .breadcrumbs { font-size: 0.95rem; margin: 0 0 0.5rem; }
+    .breadcrumbs a { font-weight: 600; }
+    .rules { padding-left: 1.2rem; margin: 0; }
+    .rules li + li { margin-top: 0.4rem; }
+    .note { font-size: 0.9rem; opacity: 0.85; }
+    footer { margin-top: 1.5rem; }
+
+    .option {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        padding: 0.75rem 0.9rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+    }
+
+    .option input { margin: 0.3rem 0 0; width: 1.1rem; height: 1.1rem; flex: none; }
+
+    .buttons { display: flex; gap: 0.75rem; margin: 1rem 0; }
+
+    .buttons button {
+        flex: 1;
+        padding: 0.75rem 1.1rem;
+        border: 0;
+        border-radius: 0.9rem;
+        font: inherit;
+        font-weight: 600;
+        /* Same color as the text on the blue page */
+        background: #fff;
+        color: #000;
+        cursor: pointer;
+    }
+
+    pre {
+        margin: 0;
+        padding: 0.75rem 0.9rem;
+        border-radius: 0.75rem;
+        background: rgba(0, 0, 0, 0.3);
+        font: 0.85rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+
+    /* --- The technique --- */
+
+    /* The scrim dims and blurs the page. Safari ignores it. */
+    .scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background-color: color-mix(in srgb, var(--scrim-color) var(--scrim-opacity), transparent);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+    }
+
+    /* Solid strips in the color the scrim shows over the page. Siblings of
+       the scrim, not children: a backdrop-filter ancestor stops sampling. */
+    .scrim-edge {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        z-index: 101;
+        pointer-events: none;
+        background-color: var(--scrim-edge-color);
+    }
+
+    .scrim-edge.top { top: -7px; }      /* 5px on screen */
+    .scrim-edge.bottom { bottom: -8px; } /* 4px on screen */
+
+    /* The fade is a separate element below the strip. As a ::before or
+       ::after of the strip, it stops Safari from tinting. The strip stays on
+       top, so the hit test at the edge finds the strip. */
+    .scrim-fade {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 96px;
+        z-index: 100;
+        pointer-events: none;
+    }
+
+    .scrim-fade.top {
+        top: 0;
+        background-image: linear-gradient(to bottom, var(--scrim-edge-color), transparent);
+    }
+
+    .scrim-fade.bottom {
+        bottom: 0;
+        background-image: linear-gradient(to top, var(--scrim-edge-color), transparent);
+    }
+
+    .sheet, .dialog {
+        position: fixed;
+        z-index: 102;
+        box-sizing: border-box;
+        background: var(--surface);
+        color: var(--surface-text);
+    }
+
+    /* The sheet touches the bottom edge, so it tints the toolbar itself */
+    .sheet {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        min-height: 45vh;
+        padding: 1.5rem 1.5rem calc(env(safe-area-inset-bottom) + 5rem);
+        border-radius: 2rem 2rem 0 0;
+        animation: slide-up 300ms cubic-bezier(.32, .72, 0, 1);
+    }
+
+    .dialog {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(20rem, calc(100% - 3rem));
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        text-align: center;
+    }
+
+    @keyframes slide-up { from { transform: translateY(100%); } }
+
+    .sheet h2, .dialog h2 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+
+    .sheet button, .dialog button {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.7rem;
+        border: 0;
+        border-radius: 0.9rem;
+        font: inherit;
+        font-weight: 600;
+        background: var(--surface-text);
+        color: var(--surface);
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<main>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Scrim</span></nav>
+    <h1>Scrim</h1>
+    <p>A sheet or a dialog dims and blurs the page behind it with a translucent layer: a scrim. Safari ignores the scrim, so the status bar and the toolbar keep the page color above and below the dimmed page.</p>
+    <p>A solid strip at the edge, in the color the scrim shows over the page, makes them match the scrim.</p>
+
+    <label class="option">
+        <input type="checkbox" id="edges" checked>
+        <span>Match the status bar and the toolbar to the scrim</span>
+    </label>
+
+    <div class="buttons">
+        <button type="button" data-open="sheet">Open Sheet</button>
+        <button type="button" data-open="dialog">Open Dialog</button>
+    </div>
+
+    <h2>Sheet</h2>
+    <p>The sheet covers the bottom edge, and Safari tints the toolbar with the color of the sheet. Only the top edge needs a strip.</p>
+
+    <h2>Dialog</h2>
+    <p>The dialog touches no edge, so both edges need a strip.</p>
+
+
+    <h2>Rules</h2>
+    <ul class="rules">
+        <li>Mount the strips with the scrim and remove them with it. Safari then returns to the page color by itself.</li>
+        <li>Put the strips beside the scrim, not inside it. The scrim has a <code>backdrop-filter</code>, and Safari does not tint for an element inside one.</li>
+        <li>The strip color is the scrim color mixed over the page color at the edge. Use the color of a fixed header instead of the page color if one is at the edge.</li>
+        <li>On macOS and iPad, opening the sheet or the dialog is an interaction, after which Safari keeps its top color until the page reloads. The top strip works on iPhone only.</li>
+    </ul>
+    <p class="note">Technique: <a href="https://gist.github.com/caelinsutch/4a484b1754344e330290eb364d6f008a">gist by caelinsutch</a>.</p>
+
+    <footer><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Scrim</span></nav></footer>
+</main>
+
+<script>
+(() => {
+    const edgesBox = document.getElementById('edges');
+    const params = new URLSearchParams(location.search);
+    if (params.get('edges') === '0') edgesBox.checked = false;
+
+    let open = null;
+    let opener = null;
+
+    const element = (className, html = '') => {
+        const el = document.createElement('div');
+        el.className = className;
+        el.innerHTML = html;
+        return el;
+    };
+
+    // Scrim, strips and surface mount and unmount together
+    const close = () => {
+        if (!open) return;
+        open.forEach((el) => el.remove());
+        open = null;
+        opener?.focus({ preventScroll: true });
+    };
+
+    const show = (kind) => {
+        if (open) return;
+        const matched = edgesBox.checked;
+        // The sheet tints the toolbar itself: it needs the top strip only
+        const sides = !matched ? [] : kind === 'sheet' ? ['top'] : ['top', 'bottom'];
+        const strips = sides.flatMap((side) => {
+            const strip = element(`scrim-edge ${side}`);
+            strip.setAttribute('aria-hidden', 'true');
+            // ?fade=0 leaves out the fade (for comparison)
+            if (params.get('fade') === '0') return [strip];
+            const fade = element(`scrim-fade ${side}`);
+            fade.setAttribute('aria-hidden', 'true');
+            return [fade, strip];
+        });
+        const title = kind === 'sheet' ? 'Sheet' : 'Dialog';
+        const text = matched
+            ? (kind === 'sheet'
+                ? 'The status bar matches the scrim. The toolbar matches the sheet.'
+                : 'The status bar and the toolbar match the scrim.')
+            : (kind === 'sheet'
+                ? 'The status bar keeps the page color. The toolbar matches the sheet.'
+                : 'The status bar and the toolbar keep the page color.');
+        const surface = element(kind, `<h2 id="surface-title">${title}</h2><p>${text}</p><button type="button">Close</button>`);
+        surface.setAttribute('role', 'dialog');
+        surface.setAttribute('aria-modal', 'true');
+        surface.setAttribute('aria-labelledby', 'surface-title');
+
+        const scrim = element('scrim');
+        open = [scrim, ...strips, surface];
+        document.body.append(...open);
+        scrim.addEventListener('click', close);
+        surface.querySelector('button').addEventListener('click', close);
+        surface.querySelector('button').focus({ preventScroll: true });
+    };
+
+    for (const button of document.querySelectorAll('[data-open]')) {
+        button.addEventListener('click', () => { opener = button; show(button.dataset.open); });
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+    // ?open=sheet or ?open=dialog opens it on load (used by tests/run.py)
+    const kind = params.get('open');
+    if (kind === 'sheet' || kind === 'dialog') show(kind);
+})();
+</script>
+</body>
+</html>
