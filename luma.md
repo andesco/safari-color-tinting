@@ -83,11 +83,11 @@ function selectThemeWithLuma(bgColor) {
 | Threshold | 127.5 | 0.179 | 0.5 |
 | Use Case | Perceived Brightness | Accessibility Contrast Ratios | Perceptual Color Manipulation |
 
-### [Luma vs. WGAG vs. Oklab][vs.]
+### [Luma vs. WCAG vs. Oklab][vs.]
 
 <img src="luma-vs-wcag-vs-oklch.svg" alt="Luma Y vs WCAG Relative Luminance vs Oklab L — 6 colors where Y and L disagree on text color">
 
-source: [Luma vs. WGAG vs. Oklab][vs.]
+source: [Luma vs. WCAG vs. Oklab][vs.]
 
 ## References
 
@@ -103,4 +103,4 @@ source: [Luma vs. WGAG vs. Oklab][vs.]
 [wiki]: https://en.wikipedia.org/wiki/Luma_(video)
 [Apple]: https://developer.apple.com/documentation/coregraphics/cgcolorspace/itur_709
 [Oklab]: https://bottosson.github.io/posts/oklab/
-[vs.]: https://safari-color-tinting.pages.dev/luma-vs-wcag-vs-oklch.htmlus
+[vs.]: https://safari-color-tinting.pages.dev/luma-vs-wcag-vs-oklch.html
