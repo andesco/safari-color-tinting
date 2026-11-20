@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Safari Color Tinting: Scrim</title>
+<title>Safari Color Tinting: Blending Tinting and Page Blurs</title>
 <style>
     :root {
         --page: #0088ff;
@@ -34,7 +34,6 @@
     .breadcrumbs a { font-weight: 600; }
     .rules { padding-left: 1.2rem; margin: 0; }
     .rules li + li { margin-top: 0.4rem; }
-    .note { font-size: 0.9rem; opacity: 0.85; }
     footer { margin-top: 1.5rem; }
 
     .option {
@@ -174,8 +173,8 @@
 </head>
 <body>
 <main>
-    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Scrim</span></nav>
-    <h1>Scrim</h1>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Blending Tinting and Page Blurs</span></nav>
+    <h1>Blending Tinting and Page Blurs</h1>
     <p>A sheet or a dialog dims and blurs the page behind it with a translucent layer: a scrim. Safari ignores the scrim, so the status bar and the toolbar keep the page color above and below the dimmed page.</p>
     <p>A solid strip at the edge, in the color the scrim shows over the page, makes them match the scrim.</p>
 
@@ -203,9 +202,9 @@
         <li>The strip color is the scrim color mixed over the page color at the edge. Use the color of a fixed header instead of the page color if one is at the edge.</li>
         <li>On macOS and iPad, opening the sheet or the dialog is an interaction, after which Safari keeps its top color until the page reloads. The top strip works on iPhone only.</li>
     </ul>
-    <p class="note">Technique: <a href="https://gist.github.com/caelinsutch/4a484b1754344e330290eb364d6f008a">gist by caelinsutch</a>.</p>
+    <p>Technique: <a href="https://gist.github.com/caelinsutch/4a484b1754344e330290eb364d6f008a">gist by caelinsutch</a>. Code for this page: <a href="https://github.com/andesco/safari-color-tinting/blob/main/scrim.html">scrim.html</a>.</p>
 
-    <footer><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Scrim</span></nav></footer>
+    <footer><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Safari Color Tinting</a> › <span aria-current="page">Blending Tinting and Page Blurs</span></nav></footer>
 </main>
 
 <script>
