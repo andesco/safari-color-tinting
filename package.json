@@ -2,11 +2,10 @@
   "name": "safari-color-tinting",
   "version": "1.0.0",
   "description": "A demo of how Safari's tab bar color is determined.",
-  "main": "script.js",
+  "main": "public/script.js",
   "scripts": {
-    "dev": "wrangler pages dev . --config wrangler.local.toml",
-    "deploy": "wrangler pages deploy . --commit-dirty=true",
-    "deploy:commit": "wrangler pages deploy . --commit-hash $(git rev-parse HEAD) --commit-dirty=true"
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy"
   },
   "keywords": [
     "safari",
@@ -21,6 +20,6 @@
     "highlight.js": "^11.9.0"
   },
   "devDependencies": {
-    "wrangler": "^3.15.0"
+    "wrangler": "^4.76.0"
   }
 }

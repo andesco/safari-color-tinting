@@ -8,7 +8,6 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 yarn.lock
-package.json
 
 # Editor directories and files
 .vscode/

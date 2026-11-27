@@ -1,4 +1,4 @@
-<img src="images/safari-macOS-26.png" alt="Safari macOS Tab Bar" style="max-width: 551px; display: block; margin: 0 auto;">
+<img src="public/images/safari-macOS-26.png" alt="Safari macOS Tab Bar" style="max-width: 551px; display: block; margin: 0 auto;">
 
 # Safari Color Tinting
 

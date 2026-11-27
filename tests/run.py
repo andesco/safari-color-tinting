@@ -13,13 +13,14 @@ tinting must be on (Settings > Apps > Safari > Tabs: Allow Website Tinting).
 import argparse, json, re, struct, subprocess, sys, tempfile, time
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+# The test pages, their colors and the expected results are part of the site
+PAGES = Path(__file__).resolve().parent.parent / 'public' / 'tests'
 TOLERANCE = 40
 
 
 def css_colors():
     """Named colors from tests.css, including the scrim mixed over the page."""
-    css = (HERE / 'tests.css').read_text()
+    css = (PAGES / 'tests.css').read_text()
 
     def hex_var(name):
         m = re.search(rf'--{name}:\s*#([0-9a-fA-F]{{6}})', css)
@@ -95,7 +96,7 @@ def main():
     args = ap.parse_args()
 
     colors = css_colors()
-    cases = [c for c in json.loads((HERE / 'cases.json').read_text())['cases'] if re.search(args.only, c['id'])]
+    cases = [c for c in json.loads((PAGES / 'cases.json').read_text())['cases'] if re.search(args.only, c['id'])]
     base = args.base if args.base.endswith('/') else args.base + '/'
     failures = 0
     # Warm-up load: the first page after Safari launches can be captured before
