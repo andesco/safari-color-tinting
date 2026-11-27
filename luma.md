@@ -9,13 +9,11 @@ background is considered **dark** → Safari uses **light text**
 - **luma > 127.5**: \
 background is considered **light** → Safari uses **dark text**
 
-This midpoint threshold better ensures legibility by selecting text colors that provide strong contrast against the background.
-
 ## Luma
 
-Rec. 709 ([ITU Recommendation BT.709][ITU]) is the international standard for <abbr title="high-definition television">HDTV</abbr>. The luma calculation from this standard provides a way to convert RGB color values into a perceived brightness value that closely matches human visual perception.
+Rec. 709 ([ITU Recommendation BT.709][ITU]) is the international standard for <abbr title="high-definition television">HDTV</abbr>. It defines how to calculate luma from the red, green and blue values of a color.
 
-Human eyes are more sensitive to green light than red and to red light than blue. Rec. 709 luma coefficients account for this by weighting each color channel differently. The weighted sum produces a single brightness value that represents how bright a color appears to the human eye.
+Luma is a weighted sum of gamma-encoded RGB values. In video, it represents the brightness of an image: its black-and-white part. Luma is not the same as relative luminance, which applies weights to linear RGB values, and it does not exactly represent the luminance of an image ([Wikipedia: Luma][wiki]). Of the three Rec. 709 weights, green is the largest and blue is the smallest.
 
 ### Luma Formula
 
@@ -38,9 +36,9 @@ Blue     | `B`      | 0-255 |  7.22%
 | Black | `#000000` | 0 | 0 | 0 | 0.00 | light |
 | Blue | `#0000FF` | 0 | 0 | 255 | 18.41 | light |
 | Red | `#FF0000` | 255 | 0 | 0 | 54.21 | light |
+| Gray | `#7F7F7F` | 127 | 127 | 127 | 127.00 | light |
 | Gray | `#808080` | 128 | 128 | 128 | 128.00 | dark |
 | Green | `#00FF00` | 0 | 255 | 0 | 182.38 | dark |
-| Yellow | `#FFFF00` | 255 | 255 | 0 | 236.59 | dark |
 | White | `#FFFFFF` | 255 | 255 | 255 | 255.00 | dark |
 
 ### Implementation Example
@@ -68,39 +66,62 @@ function selectThemeWithLuma(bgColor) {
 ## Alternatives
 
 ### WCAG Relative Luminance
-[Relative luminance][WCAG] in <abbr title="World Wide Web Consortium">W3C</abbr> Accessibility Guidelines uses the same Rec. 709 coefficients (0.2126, 0.7152, 0.0722) but applies a complex (slow) gamma correction formula to linearize sRGB values before weighting. This produces a 0-1 luminance value used to calculate accessibility contrast ratios. (Rec. 709 Luma skips this gamma correction step, applying coefficients directly to sRGB values.)
+<abbr title="World Wide Web Consortium">W3C</abbr> Web Content Accessibility Guidelines (WCAG) define [relative luminance][WCAG] from 0 (black) to 1 (white), using the Rec. 709 weights on linearized sRGB values. At level AA, the [contrast ratio][ratio] between text and background must be [at least 4.5:1, or 3:1 for large text][minimum] (18 pt, or 14 pt bold). Above a relative luminance of about `0.179`, black text has a higher ratio than white text ([Lea Verou][verou], an editor of W3C’s [CSS Color specifications][css5]).
 
 ### Oklab Lightness
 
-[Oklab] is a perceptual color model by Björn Ottosson. Its Lightness value `L` represents perceived brightness through a matrix transform and multi-step conversion: sRGB → Linear RGB → LMS cone response → cube root → Oklab. Equal steps in Oklab `L` correspond to equal perceived brightness differences (unlike with luma `Y`).
+[Oklab], by Björn Ottosson, is designed to predict perceived lightness, chroma and hue. Its `L` is perceived lightness on a [scale from 0 to 1][css], with `0.5` at the midpoint.
 
 ### Comparison
 
 | Feature | ITU Rec. 709 <br> Luma | WCAG <br> Relative Luminance | Oklab <br> Lightness |
 |---------|---------------|-------------------------|-----------------|
-| Gamma Correction | No | Yes: complex formula | Yes: complex matrix transformation |
+| Linearizes sRGB | No | Yes | Yes, then converts to Oklab |
 | Output Range | 0-255 | 0-1 | 0-1 |
-| Threshold | 127.5 | 0.179 | 0.5 |
-| Use Case | Perceived Brightness | Accessibility Contrast Ratios | Perceptual Color Manipulation |
+| Dark Text Cut-off | > 127.5 | > 0.179 | > 0.5 |
+| Defined For | Video signals | Contrast ratios | Image processing |
 
 ### [Luma vs. WCAG vs. Oklab][vs.]
 
-<img src="luma-vs-wcag-vs-oklch.svg" alt="Luma Y vs WCAG Relative Luminance vs Oklab L — 6 colors where Y and L disagree on text color">
+Each cell uses the text color that its method selects.
 
-source: [Luma vs. WCAG vs. Oklab][vs.]
+#### Gray Steps
+
+Three pairs of grays, each one RGB step apart.
+
+<img src="luma-comparison-grays.svg" alt="Gray Steps: six grays compared by luma, WCAG relative luminance and Oklab lightness">
+
+#### Apple System Colors
+
+Light appearance values from Apple’s [Human Interface Guidelines][HIG] (June 2025).
+
+<img src="luma-comparison-apple.svg" alt="Apple System Colors: Blue, Indigo, Red and Green compared by luma, WCAG relative luminance and Oklab lightness">
+
+source: [Compare Web-Safe Colors][vs.]
 
 ## References
 
 - [ITU-R Recommendation BT.709][ITU]
-- [W3C Accessibility Guidelines: relative luminance][WCAG]
+- [W3C WCAG 2.2: relative luminance][WCAG]
+- [W3C: Understanding Contrast (Minimum)][readability]
 - [Wikipedia: Luma][wiki]
 - [Apple Developer: System-Defined Color Spaces][Apple]
+- [Apple Human Interface Guidelines: Color][HIG]
+- [W3C CSS Color 4: Oklab and OkLCh][css]
+- [Lea Verou: On automatically generating contrasting text colors with CSS][verou]
 - [Björn Ottosson: A perceptual color space for image processing (Oklab)][Oklab]
 
 
 [ITU]: https://www.itu.int/rec/R-REC-BT.709/
-[WCAG]: https://www.w3.org/WAI/GL/wiki/Relative_luminance
+[WCAG]: https://www.w3.org/TR/WCAG22/#dfn-relative-luminance
+[ratio]: https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio
+[minimum]: https://www.w3.org/TR/WCAG22/#contrast-minimum
+[readability]: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+[HIG]: https://developer.apple.com/design/human-interface-guidelines/color
 [wiki]: https://en.wikipedia.org/wiki/Luma_(video)
 [Apple]: https://developer.apple.com/documentation/coregraphics/cgcolorspace/itur_709
 [Oklab]: https://bottosson.github.io/posts/oklab/
+[css]: https://www.w3.org/TR/css-color-4/#specifying-oklab-oklch
+[verou]: https://lea.verou.me/blog/2024/contrast-color/#xyz-wcag
+[css5]: https://www.w3.org/TR/css-color-5/
 [vs.]: https://safari-color-tinting.pages.dev/luma-vs-wcag-vs-oklch.html

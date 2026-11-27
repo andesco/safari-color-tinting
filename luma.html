@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Luma: Apple &amp; Perceived Brightness</title>
+<link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css" media="(prefers-color-scheme: light)">
+<link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark-dimmed.min.css" media="(prefers-color-scheme: dark)">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<meta property="og:title" content="Luma: Apple &amp; Perceived Brightness" />
+<meta name="author" content="Andrew Escobar" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="How Safari uses Rec. 709 luma to choose light or dark text, compared with WCAG relative luminance and Oklab lightness." />
+<meta property="og:description" content="How Safari uses Rec. 709 luma to choose light or dark text, compared with WCAG relative luminance and Oklab lightness." />
+<link rel="canonical" href="https://safari-color-tinting.pages.dev/luma" />
+<meta property="og:url" content="https://safari-color-tinting.pages.dev/luma" />
+<meta property="og:site_name" content="Andrew Escobar: notes" />
+<meta property="og:type" content="article" />
+<link rel="stylesheet" href="style.css?v=64">
+<link rel="stylesheet" href="luma.css">
+<link rel="stylesheet" href="links.css">
+</head>
+
+<body>
+<script src="theme.js"></script>
+
+<h1><a href="/luma">Luma: Apple &amp; Perceived Brightness</a></h1>
+
+<div id="theme-switch" class="theme-switch" role="radiogroup" aria-label="Page background" hidden>
+    <label><input type="radio" name="theme" value="auto"><span>Auto</span></label>
+    <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+    <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+</div>
+
+<main>
+    <section class="card-container doc">
+        <p>Apple uses <a href="#luma">luma</a> (perceived brightness) to set text color based on background color. Apple divides the full luma range into equal halves, providing a simple and consistent decision boundary.</p>
+        <p>When Safari uses a webpage <nobr><code class="inline-code">background-color</code></nobr> to color browser UI, it also calculates the <nobr><code class="inline-code">background-color</code></nobr> luma to set browser UI text color:</p>
+        <div class="rule">
+            <div class="on-dark"><strong>luma ≤ 127.5</strong>Background is <b>dark</b>: Safari uses <b>light text</b></div>
+            <div class="on-light"><strong>luma &gt; 127.5</strong>Background is <b>light</b>: Safari uses <b>dark text</b></div>
+        </div>
+        <p><a href="./">Try it in the Safari Color Tinting demo</a>.</p>
+    </section>
+
+    <section class="card-container doc" id="luma">
+        <h2>Luma</h2>
+        <p>Rec. 709 (<a href="https://www.itu.int/rec/R-REC-BT.709/">ITU Recommendation BT.709</a>) is the international standard for <abbr title="high-definition television">HDTV</abbr>. It defines how to calculate luma from the red, green and blue values of a color.</p>
+        <p>Luma is a weighted sum of gamma-encoded RGB values. In video, it represents the brightness of an image: its black-and-white part. Luma is not the same as relative luminance, which applies weights to linear RGB values, and it does not exactly represent the luminance of an image (<a href="https://en.wikipedia.org/wiki/Luma_(video)">Wikipedia: Luma</a>). Of the three Rec. 709 weights, green is the largest and blue is the smallest.</p>
+
+        <h3>Luma Formula</h3>
+        <pre><code class="nohighlight">Y = ( 0.2126 × R ) + ( 0.7152 × G ) + ( 0.0722 × B )</code></pre>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th></th><th>Variable</th><th>Range</th><th class="num">Weight</th></tr></thead>
+                <tbody>
+                    <tr><td>Red</td><td><code>R</code></td><td>0–255</td><td class="num">21.26%</td></tr>
+                    <tr><td>Green</td><td><code>G</code></td><td>0–255</td><td class="num">71.52%</td></tr>
+                    <tr><td>Blue</td><td><code>B</code></td><td>0–255</td><td class="num">7.22%</td></tr>
+                </tbody>
+                <tfoot><tr><td>Luma</td><td><code class="inline-code">Y</code></td><td>0–255</td><td></td></tr></tfoot>
+            </table>
+        </div>
+
+        <h3>Examples</h3>
+        <p>Each color name uses the text color that luma selects.</p>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>HTML Color</th><th>Hex</th><th class="num"><code>R</code></th><th class="num"><code>G</code></th><th class="num"><code>B</code></th><th class="num"><code class="inline-code">Y</code></th><th>Text</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="swatch" style="background:#000000;color:#fff">Black</span></td><td><code>#000000</code></td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0.00</td><td>light</td></tr>
+                    <tr><td><span class="swatch" style="background:#0000FF;color:#fff">Blue</span></td><td><code>#0000FF</code></td><td class="num">0</td><td class="num">0</td><td class="num">255</td><td class="num">18.41</td><td>light</td></tr>
+                    <tr><td><span class="swatch" style="background:#FF0000;color:#fff">Red</span></td><td><code>#FF0000</code></td><td class="num">255</td><td class="num">0</td><td class="num">0</td><td class="num">54.21</td><td>light</td></tr>
+                    <tr><td><span class="swatch" style="background:#7F7F7F;color:#fff">Gray</span></td><td><code>#7F7F7F</code></td><td class="num">127</td><td class="num">127</td><td class="num">127</td><td class="num">127.00</td><td>light</td></tr>
+                    <tr><td><span class="swatch" style="background:#808080;color:#000">Gray</span></td><td><code>#808080</code></td><td class="num">128</td><td class="num">128</td><td class="num">128</td><td class="num">128.00</td><td>dark</td></tr>
+                    <tr><td><span class="swatch" style="background:#00FF00;color:#000">Green</span></td><td><code>#00FF00</code></td><td class="num">0</td><td class="num">255</td><td class="num">0</td><td class="num">182.38</td><td>dark</td></tr>
+                    <tr><td><span class="swatch" style="background:#FFFFFF;color:#000">White</span></td><td><code>#FFFFFF</code></td><td class="num">255</td><td class="num">255</td><td class="num">255</td><td class="num">255.00</td><td>dark</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Implementation Example</h3>
+        <pre><code class="language-javascript">function selectThemeWithLuma(bgColor) {
+  // remove leading #
+  let hex = bgColor.replace(/^#/, '');
+
+  // parse RGB components from hex
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // calculate Rec. 709 Luma using standard coefficients
+  const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  // threshold at midpoint: 127.5
+  // Y ≤ 127.5 = dark background, use light text
+  // Y > 127.5 = light background, use dark text
+  return Y <= 127.5;
+}</code></pre>
+    </section>
+
+    <section class="card-container doc" id="alternatives">
+        <h2>Alternatives</h2>
+
+        <h3>WCAG Relative Luminance</h3>
+        <p><abbr title="World Wide Web Consortium">W3C</abbr> Web Content Accessibility Guidelines (WCAG) define <a href="https://www.w3.org/TR/WCAG22/#dfn-relative-luminance">relative luminance</a> from 0 (black) to 1 (white), using the Rec. 709 weights on linearized sRGB values. At level AA, the <a href="https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio">contrast ratio</a> between text and background must be <a href="https://www.w3.org/TR/WCAG22/#contrast-minimum">at least 4.5:1, or 3:1 for large text</a> (18 pt, or 14 pt bold). Above a relative luminance of about <code class="inline-code">0.179</code>, black text has a higher ratio than white text (<a href="https://lea.verou.me/blog/2024/contrast-color/#xyz-wcag">Lea Verou</a>, an editor of W3C’s <a href="https://www.w3.org/TR/css-color-5/">CSS Color specifications</a>).</p>
+
+        <h3>Oklab Lightness</h3>
+        <p><a href="https://bottosson.github.io/posts/oklab/">Oklab</a>, by Björn Ottosson, is designed to predict perceived lightness, chroma and hue. Its <code class="inline-code">L</code> is perceived lightness on a <a href="https://www.w3.org/TR/css-color-4/#specifying-oklab-oklch">scale from 0 to 1</a>, with <code class="inline-code">0.5</code> at the midpoint.</p>
+
+        <h3>Comparison</h3>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>Feature</th><th>ITU Rec. 709<br>Luma</th><th>WCAG<br>Relative Luminance</th><th>Oklab<br>Lightness</th></tr></thead>
+                <tbody>
+                    <tr><th>Linearizes sRGB</th><td>No</td><td>Yes</td><td>Yes, then converts to Oklab</td></tr>
+                    <tr><th>Output Range</th><td>0–255</td><td>0–1</td><td>0–1</td></tr>
+                    <tr><th>Dark Text Cut-off</th><td>&gt; 127.5</td><td>&gt; 0.179</td><td>&gt; 0.5</td></tr>
+                    <tr><th>Defined For</th><td>Video signals</td><td>Contrast ratios</td><td>Image processing</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card-container doc" id="comparison">
+        <h2>Luma vs. WCAG vs. Oklab</h2>
+        <p>Each cell uses the text color that its method selects.</p>
+
+        <h3>Gray Steps</h3>
+        <p>Three pairs of grays, each one RGB step apart.</p>
+        <div class="table-scroll">
+            <table class="compare">
+                <thead><tr><th>Hex</th><th>Luma <code class="inline-code">Y</code></th><th>WCAG <code class="inline-code">W</code></th><th>Oklab <code class="inline-code">L</code></th></tr></thead>
+                <tbody>
+                    <tr style="--c:#636363"><th>#636363</th><td class="w">99.0<small>light text</small></td><td class="w">0.1248<small>light text</small></td><td class="w">0.500<small>light text</small></td></tr>
+                    <tr style="--c:#646464"><th>#646464</th><td class="w">100.0<small>light text</small></td><td class="w">0.1274<small>light text</small></td><td class="k">0.503<small>dark text</small></td></tr>
+                    <tr style="--c:#757575"><th>#757575</th><td class="w">117.0<small>light text</small></td><td class="w">0.1779<small>light text</small></td><td class="k">0.562<small>dark text</small></td></tr>
+                    <tr style="--c:#767676"><th>#767676</th><td class="w">118.0<small>light text</small></td><td class="k">0.1812<small>dark text</small></td><td class="k">0.566<small>dark text</small></td></tr>
+                    <tr style="--c:#7f7f7f"><th>#7f7f7f</th><td class="w">127.0<small>light text</small></td><td class="k">0.2122<small>dark text</small></td><td class="k">0.597<small>dark text</small></td></tr>
+                    <tr style="--c:#808080"><th>#808080</th><td class="k">128.0<small>dark text</small></td><td class="k">0.2159<small>dark text</small></td><td class="k">0.600<small>dark text</small></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Apple System Colors</h3>
+        <p>Light appearance values from Apple’s <a href="https://developer.apple.com/design/human-interface-guidelines/color">Human Interface Guidelines</a> (June 2025).</p>
+        <div class="table-scroll">
+            <table class="compare">
+                <thead><tr><th>Color</th><th>Luma <code class="inline-code">Y</code></th><th>WCAG <code class="inline-code">W</code></th><th>Oklab <code class="inline-code">L</code></th></tr></thead>
+                <tbody>
+                    <tr style="--c:#0088ff"><th>Blue<small>#0088ff</small></th><td class="w">115.7<small>light text</small></td><td class="k">0.2483<small>dark text</small></td><td class="k">0.632<small>dark text</small></td></tr>
+                    <tr style="--c:#6155f5"><th>Indigo<small>#6155f5</small></th><td class="w">99.1<small>light text</small></td><td class="w">0.1563<small>light text</small></td><td class="k">0.559<small>dark text</small></td></tr>
+                    <tr style="--c:#ff383c"><th>Red<small>#ff383c</small></th><td class="w">98.6<small>light text</small></td><td class="k">0.2441<small>dark text</small></td><td class="k">0.653<small>dark text</small></td></tr>
+                    <tr style="--c:#34c759"><th>Green<small>#34c759</small></th><td class="k">159.8<small>dark text</small></td><td class="k">0.4230<small>dark text</small></td><td class="k">0.730<small>dark text</small></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <a class="page-button" href="luma-vs-wcag-vs-oklch.html">Compare Web-Safe Colors</a>
+    </section>
+
+    <section class="card-container doc" id="references">
+        <h2>References</h2>
+        <ul>
+            <li><a href="https://www.itu.int/rec/R-REC-BT.709/">ITU-R Recommendation BT.709</a></li>
+            <li><a href="https://www.w3.org/TR/WCAG22/#dfn-relative-luminance">W3C WCAG 2.2: relative luminance</a></li>
+            <li><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">W3C: Understanding Contrast (Minimum)</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Luma_(video)">Wikipedia: Luma</a></li>
+            <li><a href="https://developer.apple.com/documentation/coregraphics/cgcolorspace/itur_709">Apple Developer: System-Defined Color Spaces</a></li>
+            <li><a href="https://developer.apple.com/design/human-interface-guidelines/color">Apple Human Interface Guidelines: Color</a></li>
+            <li><a href="https://www.w3.org/TR/css-color-4/#specifying-oklab-oklch">W3C CSS Color 4: Oklab and OkLCh</a></li>
+            <li><a href="https://lea.verou.me/blog/2024/contrast-color/#xyz-wcag">Lea Verou: On automatically generating contrasting text colors with CSS</a></li>
+            <li><a href="https://bottosson.github.io/posts/oklab/">Björn Ottosson: A perceptual color space for image processing (Oklab)</a></li>
+        </ul>
+    </section>
+</main>
+
+<script>if (window.hljs) hljs.highlightAll();</script>
+
+<footer>
+    <p><a href="./">Safari Color Tinting: Demo</a><br /><br /><a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a><br /><br /><a href="https://github.com/andesco/safari-color-tinting/blob/main/LICENSE">MIT License</a> · Andrew Escobar</p>
+</footer>
+
+</body>
+</html>

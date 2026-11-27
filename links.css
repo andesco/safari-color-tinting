@@ -1,0 +1,12 @@
+/* Links, on every page: no underline. A 1px bottom border, in the text color,
+   runs below the descenders instead of through them. */
+a {
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+}
+
+/* Page titles and links drawn as buttons have no border */
+h1 a,
+a.page-button {
+    border-bottom: 0;
+}

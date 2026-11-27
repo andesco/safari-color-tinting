@@ -1,0 +1,135 @@
+/* Shared by luma.html and luma-vs-wcag-vs-oklch.html, after style.css */
+
+/* Pure white or pure black, so nothing skews how the colors read.
+   The media query covers the page until the script sets a theme class. */
+:root { color-scheme: light dark; }
+body { background-color: #fff; color: #000; }
+@media (prefers-color-scheme: dark) {
+    body { background-color: #000; color: #fff; }
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+body.light-theme { background-color: #fff; color: #000; }
+body.dark-theme { background-color: #000; color: #fff; }
+
+h1 { margin-left: 5%; margin-right: 5%; }
+a { color: inherit; }
+nobr code, td code { white-space: nowrap; }
+
+/* Appearance switch */
+.theme-switch {
+    display: inline-flex;
+    gap: 2px;
+    margin: 0 auto 1.75rem;
+    padding: 3px;
+    border: 1px solid currentColor;
+    border-radius: 0.9rem;
+}
+.theme-switch label { cursor: pointer; }
+.theme-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.theme-switch span {
+    display: block;
+    min-width: 4.5rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.65rem;
+    font-weight: 600;
+}
+.theme-switch input:checked + span { background: #000; color: #fff; }
+.dark-theme .theme-switch input:checked + span { background: #fff; color: #000; }
+.theme-switch input:focus-visible + span { outline: 2px solid #08f; outline-offset: 1px; }
+
+/* Prose cards */
+.card-container.doc {
+    align-items: stretch;
+    text-align: left;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    min-width: 0;
+}
+.doc h2 { font-size: 1.35rem; margin: 1.25rem 0 0; }
+.doc h3 { font-size: 1.125rem; margin: 1.25rem 0 0; }
+.doc p { margin: 0.75rem 0 0; }
+
+/* The threshold rule, shown on the midpoint grays */
+.rule {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+}
+.rule div { padding: 1rem; border-radius: 8px; text-align: center; }
+.rule strong { display: block; font-size: 1.25rem; }
+.rule .on-dark { background: #7f7f7f; color: #fff; }
+.rule .on-light { background: #808080; color: #000; }
+
+.doc pre {
+    margin: 0.75rem 0 0;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.light-theme .doc pre { background: rgba(0, 0, 0, 0.06); }
+.dark-theme .doc pre { background: rgba(255, 255, 255, 0.1); }
+.doc pre code, .doc pre code.hljs {
+    padding: 0;
+    background: transparent;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+/* Tables */
+.table-scroll { margin-top: 0.75rem; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 1rem; }
+th, td { padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+thead th { font-size: 0.85rem; vertical-align: bottom; }
+tr { border-bottom: 1px solid rgba(128, 128, 128, 0.4); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot th, tfoot td { font-weight: 700; }
+
+/* Swatches carry a gray outline so black and white stay visible */
+.swatch {
+    display: block;
+    min-width: 4.5rem;
+    margin: -0.15rem 0;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.6);
+    font-weight: 600;
+}
+
+/* Embedded comparison: each cell uses the text color its method selects */
+.compare { table-layout: fixed; border-collapse: separate; border-spacing: 3px; font-size: 0.85rem; }
+.compare tr { border: 0; }
+.compare th, .compare td { padding: 0.45rem 0.2rem; text-align: center; vertical-align: middle; }
+.compare th:first-child { width: 5.25rem; }
+.compare tbody th, .compare td { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.compare td { background: var(--c); border-radius: 4px; font-weight: 600; }
+.compare td small, .compare th small { display: block; font-size: 0.7rem; font-weight: 500; }
+.compare .w { color: #fff; }
+.compare .k { color: #000; }
+
+.doc .page-button { margin-top: 1.25rem; }
+.doc ul { padding-left: 1.2rem; margin: 0.75rem 0 0; }
+.doc li + li { margin-top: 0.4rem; }
+footer { margin-top: 3rem; text-align: center; }
+
+@media screen and (max-width: 512px) {
+    .card-container.doc { font-size: 1.0625rem; }
+    .rule { grid-template-columns: 1fr; gap: 0.6rem; }
+    table { font-size: 0.85rem; }
+    th, td { padding: 0.4rem 0.2rem; }
+    #alternatives table { font-size: 0.78rem; }
+    .swatch { min-width: 0; }
+    .compare { font-size: 0.7rem; border-spacing: 2px; }
+    .compare th:first-child { width: 4rem; }
+    .compare td small { font-size: 0.6rem; }
+}
+
+/* Code letters in column headings: tight enough to stay on one line on a phone */
+.compare thead th { white-space: nowrap; }
+.compare thead .inline-code { padding: 0.05rem 0.2rem; }
+@media screen and (max-width: 512px) {
+    .compare thead button::after { content: '▲'; }
+    .compare thead [aria-sort="descending"] button::after { content: '▼'; }
+}

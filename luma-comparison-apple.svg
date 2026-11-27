@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 204" width="420" height="204" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <title>Apple System Colors: luma, WCAG relative luminance and Oklab lightness</title>
+  <style>
+    .bg { fill: #fff; }
+    .title, .head, .code, .name, .hex { fill: #000; }
+    .title { font: 700 14px system-ui, -apple-system, sans-serif; }
+    .head { font: 700 10px system-ui, -apple-system, sans-serif; }
+    .code { font-size: 10px; font-weight: 700; }
+    .code-bg { fill: #000; fill-opacity: 0.08; }
+    .name { font-size: 10px; font-weight: 700; }
+    .hex { font-size: 9px; }
+    .value { font-size: 10px; font-weight: 700; }
+    .verdict { font-size: 8px; }
+    .chip { stroke: #808080; stroke-width: 0.5; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #000; }
+      .title, .head, .code, .name, .hex { fill: #fff; }
+      .code-bg { fill: #fff; fill-opacity: 0.16; }
+    }
+  </style>
+  <rect width="420" height="204" rx="6" class="bg"/>
+  <text x="210" y="23" text-anchor="middle" class="title">Apple System Colors</text>
+  <text x="86" y="48" text-anchor="end" class="head">Color</text>
+  <text x="152" y="48" text-anchor="end" class="head">Luma</text>
+  <rect x="156" y="38" width="14" height="14" rx="3" class="code-bg"/>
+  <text x="163" y="48" text-anchor="middle" class="code">Y</text>
+  <text x="258" y="48" text-anchor="end" class="head">WCAG</text>
+  <rect x="262" y="38" width="14" height="14" rx="3" class="code-bg"/>
+  <text x="269" y="48" text-anchor="middle" class="code">W</text>
+  <text x="364" y="48" text-anchor="end" class="head">Oklab</text>
+  <rect x="368" y="38" width="14" height="14" rx="3" class="code-bg"/>
+  <text x="375" y="48" text-anchor="middle" class="code">L</text>
+  <text x="86" y="73" text-anchor="end" class="name">Blue</text>
+  <text x="86" y="85" text-anchor="end" class="hex">#0088ff</text>
+  <rect x="94" y="60" width="102" height="31" rx="3" fill="#0088ff" class="chip"/>
+  <text x="145" y="74" text-anchor="middle" class="value" fill="#fff">115.7</text>
+  <text x="145" y="85" text-anchor="middle" class="verdict" fill="#fff">light text</text>
+  <rect x="200" y="60" width="102" height="31" rx="3" fill="#0088ff" class="chip"/>
+  <text x="251" y="74" text-anchor="middle" class="value" fill="#000">0.2483</text>
+  <text x="251" y="85" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <rect x="306" y="60" width="102" height="31" rx="3" fill="#0088ff" class="chip"/>
+  <text x="357" y="74" text-anchor="middle" class="value" fill="#000">0.632</text>
+  <text x="357" y="85" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <text x="86" y="107" text-anchor="end" class="name">Indigo</text>
+  <text x="86" y="119" text-anchor="end" class="hex">#6155f5</text>
+  <rect x="94" y="94" width="102" height="31" rx="3" fill="#6155f5" class="chip"/>
+  <text x="145" y="108" text-anchor="middle" class="value" fill="#fff">99.1</text>
+  <text x="145" y="119" text-anchor="middle" class="verdict" fill="#fff">light text</text>
+  <rect x="200" y="94" width="102" height="31" rx="3" fill="#6155f5" class="chip"/>
+  <text x="251" y="108" text-anchor="middle" class="value" fill="#fff">0.1563</text>
+  <text x="251" y="119" text-anchor="middle" class="verdict" fill="#fff">light text</text>
+  <rect x="306" y="94" width="102" height="31" rx="3" fill="#6155f5" class="chip"/>
+  <text x="357" y="108" text-anchor="middle" class="value" fill="#000">0.559</text>
+  <text x="357" y="119" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <text x="86" y="141" text-anchor="end" class="name">Red</text>
+  <text x="86" y="153" text-anchor="end" class="hex">#ff383c</text>
+  <rect x="94" y="128" width="102" height="31" rx="3" fill="#ff383c" class="chip"/>
+  <text x="145" y="142" text-anchor="middle" class="value" fill="#fff">98.6</text>
+  <text x="145" y="153" text-anchor="middle" class="verdict" fill="#fff">light text</text>
+  <rect x="200" y="128" width="102" height="31" rx="3" fill="#ff383c" class="chip"/>
+  <text x="251" y="142" text-anchor="middle" class="value" fill="#000">0.2441</text>
+  <text x="251" y="153" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <rect x="306" y="128" width="102" height="31" rx="3" fill="#ff383c" class="chip"/>
+  <text x="357" y="142" text-anchor="middle" class="value" fill="#000">0.653</text>
+  <text x="357" y="153" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <text x="86" y="175" text-anchor="end" class="name">Green</text>
+  <text x="86" y="187" text-anchor="end" class="hex">#34c759</text>
+  <rect x="94" y="162" width="102" height="31" rx="3" fill="#34c759" class="chip"/>
+  <text x="145" y="176" text-anchor="middle" class="value" fill="#000">159.8</text>
+  <text x="145" y="187" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <rect x="200" y="162" width="102" height="31" rx="3" fill="#34c759" class="chip"/>
+  <text x="251" y="176" text-anchor="middle" class="value" fill="#000">0.4230</text>
+  <text x="251" y="187" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+  <rect x="306" y="162" width="102" height="31" rx="3" fill="#34c759" class="chip"/>
+  <text x="357" y="176" text-anchor="middle" class="value" fill="#000">0.730</text>
+  <text x="357" y="187" text-anchor="middle" class="verdict" fill="#000">dark text</text>
+</svg>
