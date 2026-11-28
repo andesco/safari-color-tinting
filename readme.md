@@ -2,15 +2,38 @@
 
 # Safari Color Tinting
 
-Safari tints its user interface to match the web page: the tab bar on macOS, and the status bar and the toolbar on iPhone and iPad. Safari 26 takes the color from the page itself: the `background-color` of `<body>`, or of a fixed or sticky element at the top or the bottom edge. Users can turn tinting off in the [Safari settings](#safari-settings).
+Safari tints its user interface to match the web page: the tab bar on macOS, and the status bar and toolbar on iPhone and iPad. Safari 26 takes the color from the page itself: the `background-color` of `<body>`, or of a fixed or sticky element at the top or bottom edge. Users can turn tinting off in [Safari settings](#safari-settings).
 
 Safari 15 to 18 used the `theme-color` meta tag instead. Safari 26 ignores it.
-
-Safari uses the luma (perceived brightness) of the tint color to make the text in its user interface dark or light. Refer to [Luma: Apple & Perceived Brightness][luma].
 
 View how your web browser supports color in its UI:
 
 ### [Safari Color Tinting: Demo](https://safari-color-tinting.pages.dev "Safari Color Tinting: Demo")
+
+## Safari UI
+
+Safari uses the luma (perceived brightness) of the tint color to make the text in its user interface dark or light. Refer to [Luma: Apple & Perceived Brightness][luma].
+
+When macOS or iOS are in Dark Mode, Safari darkens a light tint color so that its user interface conforms. Tab titles and other user interface text are therefore always light.
+
+- **luma ≤ 127.5**: Safari does not change the tint color.
+- **luma > 127.5**: Safari multiplies each sRGB value by 0.4, which is the same as black at 60% opacity over the tint color:
+   - `#FFFFFF` becomes `#666666`
+   - `rgb(250, 200, 100)` becomes `rgb(100, 80, 40)`
+
+The lightest result is `#666666`, with a luma of 102. Thus the darkened tint color is always below the 127.5 threshold. Safari applies the change immediately when the system appearance changes. In Light Mode, Safari does not change the tint color.
+
+## Safari Settings
+
+Users can enable or disable browser UI color tinting in Safari 26:
+
+<!-- :icon-chevron-right: &rsaquo; -->
+<!-- :icon-checkbox: ✓ -->
+**macOS**: Safari &rsaquo; Settings &rsaquo; Tabs &rsaquo; Appearance: <nobr>✓ Show color in tab bar</nobr>
+
+**iOS**: Settings &rsaquo; Apps › Safari &rsaquo; Tabs: <nobr>Allow Website Tinting ✓</nobr>
+
+&nbsp;
 
 ## Safari 26+: `<body>` or `{position: fixed | sticky;}`
 
@@ -50,7 +73,7 @@ Safari keeps using a fixed element that it has sampled. A change to its `opacity
 
 On macOS and iPad, the top edge stops updating after the user interacts with the page or scrolls it, until the page reloads.
 
-Refer to [How WebKit Picks the Tint Color](/webkit.md) for the reasons, from the WebKit source code.
+Refer to [How WebKit Picks the Tint Color](/webkit.md) for the reasons, from WebKit source code.
 
 ### Examples
 
@@ -66,7 +89,7 @@ A sticky header:
 header { position: sticky; top: 0; width: 100%; background-color: #F70; }
 ```
 
-**Tint without a visible element.** Use a bar taller than 10px, at full width, and move it past the edge. Keep 5px on screen at the top and 4px at the bottom. The sliver has the tint color and touches the status bar or the toolbar, so it looks like part of the Safari user interface.
+**Tint without a visible element.** Use a bar taller than 10px, at full width, and move it past the edge. Keep 5px on screen at the top and 4px at the bottom. The sliver has the tint color and touches the status bar or toolbar, so it looks like part of the Safari user interface.
 
 ```css
 .tint-top    { position: fixed; left: 0; width: 100%; height: 12px; top: -7px;    background-color: #F70; }
@@ -101,18 +124,6 @@ Safari versions 15 through 18.6 supported a <nobr><code>theme-color</code></nobr
 </head>
 ```
 > While Safari 26+ still parses the <nobr><code>theme-color</code></nobr> meta tag, [Safari no longer uses this color][caniuse].
-
-## Safari Settings
-
-Users can enable or disable browser UI color tinting in Safari 26:
-
-<!-- :icon-chevron-right: &rsaquo; -->
-<!-- :icon-checkbox: ✓ -->
-**macOS**: Safari &rsaquo; Settings &rsaquo; Tabs &rsaquo; Appearance: <nobr>✓ Show color in tab bar</nobr>
-
-**iOS**: Settings &rsaquo; Apps › Safari &rsaquo; Tabs: <nobr>Allow Website Tinting ✓</nobr>
-
-&nbsp;
 
 ## Web Standards Documentation
 

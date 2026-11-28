@@ -86,6 +86,7 @@
     <div class="card-container safari-settings">
         <p>Safari tints its user interface to match the background color or a fixed element at the top or bottom edge. Learn more: <a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a></p>
         <p>Safari uses the luma (perceived brightness) of the tint color to make the text in its user interface, such as tab titles, dark or light. Refer to <a href="luma">Luma: Apple &amp; Perceived Brightness</a>.</p>
+        <p>When macOS or iOS are in Dark Mode, Safari darkens a light tint color so that its user interface conforms. Tab titles and other user interface text are therefore always light. When the luma of the tint color is more than 127.5, Safari multiplies each RGB value by 0.4: <code class="inline-code">#FFFFFF</code> becomes <code class="inline-code">#666666</code>.</p>
         <p>Users can enable or disable browser UI color tinting in Safari 26:<br /><br />
         <b>macOS</b>: Safari › Settings › Tabs › Appearance: ✓ Show color in tab bar
         <br /><br />
