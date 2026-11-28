@@ -391,6 +391,15 @@ footer a {
     align-items: flex-start;
 }
 
+.page-list {
+    font-size: 1.125rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    text-align: left;
+}
+.page-list li + li { margin-top: 0.6rem; }
+.page-list a { color: inherit; font-weight: 700; }
+
 .card-desc {
     font-size: 1.125rem;
     margin: 0 0 1rem 0;

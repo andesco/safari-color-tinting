@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://safari-color-tinting.pages.dev" />
 <meta property="og:site_name" content="Andrew Escobar: notes" />
 <meta property="og:type" content="website" />
-<link rel="stylesheet" href="style.css?v=64">
+<link rel="stylesheet" href="style.css?v=67">
 <link rel="stylesheet" href="links.css">
 </head>
 
@@ -82,11 +82,21 @@
 </div>
 <!-- end .cards-flex-wrapper -->
 
-<!-- intro and Safari settings -->
+<!-- intro -->
     <div class="card-container safari-settings">
         <p>Safari tints its user interface to match the background color or a fixed element at the top or bottom edge. Learn more: <a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a></p>
+    </div>
+
+<!-- tint color -->
+    <div class="card-container safari-settings">
+        <h4>Tint Color</h4>
         <p>Safari uses the luma (perceived brightness) of the tint color to make the text in its user interface, such as tab titles, dark or light. Refer to <a href="luma">Luma: Apple &amp; Perceived Brightness</a>.</p>
         <p>When macOS or iOS are in Dark Mode, Safari darkens a light tint color so that its user interface conforms. Tab titles and other user interface text are therefore always light. When the luma of the tint color is more than 127.5, Safari multiplies each RGB value by 0.4: <code class="inline-code">#FFFFFF</code> becomes <code class="inline-code">#666666</code>.</p>
+    </div>
+
+<!-- Safari settings -->
+    <div class="card-container safari-settings">
+        <h4>Safari Settings</h4>
         <p>Users can enable or disable browser UI color tinting in Safari 26:<br /><br />
         <b>macOS</b>: Safari › Settings › Tabs › Appearance: ✓ Show color in tab bar
         <br /><br />
@@ -157,18 +167,14 @@
         </div>
     </div>
 
-<!-- child and pseudo-element -->
+<!-- more pages -->
     <div class="card-container test-card">
-        <h4>Child and Pseudo-Element</h4>
-        <p class="card-desc">A fixed element with a child or a <code class="inline-code">::before</code> on top has more than one color. Which one Safari uses:</p>
-        <a class="page-button" href="child-pseudo-element.html">Open Child and Pseudo-Element</a>
-    </div>
-
-<!-- scrim -->
-    <div class="card-container test-card">
-        <h4>Blending Tinting and Page Blurs</h4>
-        <p class="card-desc">A sheet or a dialog dims the page with a translucent scrim. Safari ignores the scrim. How to make the status bar and the toolbar match it:</p>
-        <a class="page-button" href="scrim.html">Open Blending Tinting and Page Blurs</a>
+        <h4>More Demos</h4>
+        <ul class="page-list">
+            <li><a href="child-pseudo-element.html">Child and Pseudo-Element</a><br />A fixed element with a child or a <code class="inline-code">::before</code> on top has more than one color, and Safari uses only one of them.</li>
+            <li><a href="scrim.html">Blending Tinting and Page Blurs</a><br />A sheet or a dialog dims the page with a translucent scrim, but Safari ignores the scrim when it tints the status bar and the toolbar.</li>
+            <li><a href="quirks.html">Known Quirks</a><br />A fixed element at the bottom edge with no background color, but a child with one, can keep the toolbar at the first body color after a theme change.</li>
+        </ul>
     </div>
 
 <!-- generated code -->

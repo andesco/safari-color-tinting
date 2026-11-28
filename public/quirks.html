@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Known Quirks</title>
+<meta property="og:title" content="Known Quirks" />
+<meta name="author" content="Andrew Escobar" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="On iPhone, Safari can keep the first body color in the bottom strip after a theme change, when a fixed element with no background color touches the bottom edge." />
+<meta property="og:description" content="On iPhone, Safari can keep the first body color in the bottom strip after a theme change, when a fixed element with no background color touches the bottom edge." />
+<link rel="canonical" href="https://safari-color-tinting.pages.dev/quirks" />
+<meta property="og:url" content="https://safari-color-tinting.pages.dev/quirks" />
+<meta property="og:site_name" content="Andrew Escobar: notes" />
+<meta property="og:type" content="article" />
+<link rel="stylesheet" href="style.css?v=67">
+<link rel="stylesheet" href="luma.css">
+<link rel="stylesheet" href="links.css">
+<style>
+    /* Palette from andrewe.ca (src/styles/global.css):
+       light page: sand-100, dark page: ink-900.
+       Text: ink-900 on light, sand-100 on dark (the site's --foreground). */
+    :root {
+        --bg: #eeece7;   /* sand-100: hsl(45 16% 92%) */
+        --text: #1a1825; /* ink-900: hsl(250 22% 12%) */
+    }
+    @media (prefers-color-scheme: dark) {
+        :root { --bg: #1a1825; --text: #eeece7; }
+    }
+    :root[data-theme="light"] { --bg: #eeece7; --text: #1a1825; }
+    :root[data-theme="dark"] { --bg: #1a1825; --text: #eeece7; }
+
+    /* theme.js toggles .light-theme and .dark-theme on <body>. These rules
+       make the <body> background-color follow that switch. */
+    body, body.light-theme, body.dark-theme {
+        background-color: var(--bg);
+        color: var(--text);
+        padding-bottom: 6rem; /* room for the 5rem fixed element */
+    }
+    /* The selected option is marked with a class: Safari does not always
+       restyle :checked when a script sets it while the page loads. */
+    body.light-theme .theme-switch input + span,
+    body.dark-theme .theme-switch input + span { background: transparent; color: inherit; }
+    body.light-theme .theme-switch label.selected span,
+    body.dark-theme .theme-switch label.selected span { background: var(--text); color: var(--bg); }
+    body.light-theme .page-button,
+    body.dark-theme .page-button { background: var(--text); color: var(--bg); }
+
+    /* Controls */
+    .test-options input[type="radio"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin: 0.15rem 0 0;
+        flex-shrink: 0;
+        accent-color: var(--text);
+        cursor: pointer;
+    }
+    .test-options .option-label { align-items: flex-start; }
+    fieldset.test-options { border: 0; margin: 0.75rem 0 0; padding: 0; min-width: 0; }
+    .doc legend { padding: 0; font-weight: 600; }
+    .doc button.page-button {
+        width: auto;
+        max-width: 100%;
+        border: 0;
+        font-family: inherit;
+        cursor: pointer;
+    }
+    .doc li button.page-button {
+        display: block;
+        min-width: 0;
+        margin: 0.5rem 0 0;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.6rem;
+        font-size: 0.85rem;
+    }
+    .doc button.page-button:disabled { opacity: 0.35; cursor: default; }
+    .doc button.page-button:focus-visible { outline: 2px solid #08f; outline-offset: 2px; }
+    .doc .status { font-size: 0.95rem; }
+    .doc ol { padding-left: 1.4rem; margin: 0.75rem 0 0; }
+    .doc ol li + li { margin-top: 1rem; }
+    .doc ol .theme-switch { display: flex; width: fit-content; margin: 0.75rem 0 0; }
+    .doc ol .theme-switch span { text-align: center; }
+
+    /* The fixed element: touches the bottom edge, full width, 5rem tall.
+       It has no background color. It holds a small chip that has one, and
+       an empty area in the center. */
+    .edge-bar {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 10;
+        width: 100%;
+        height: 5rem;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        font-size: 0;
+    }
+    .edge-chip {
+        display: inline-block;
+        vertical-align: bottom;
+        box-sizing: border-box;
+        max-width: 19%;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        background-color: var(--text);
+        color: var(--bg);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    .edge-space {
+        display: inline-block;
+        width: 80%;
+        height: 5rem;
+        background-color: transparent;
+    }
+    /* Same variable as <body>, so it changes with the body */
+    .edge-bar-background { background-color: var(--bg); }
+</style>
+</head>
+
+<body>
+<script src="theme.js"></script>
+
+<h1><a href="/quirks">Known Quirks</a></h1>
+
+<main>
+    <section class="card-container doc">
+        <p>On iPhone, Safari 26 and later tints the strip behind the address bar with the <nobr><code class="inline-code">background-color</code></nobr> of <code class="inline-code">&lt;body&gt;</code>. It follows the color when the page changes it.</p>
+        <p>One quirk breaks this. A fixed element touches the bottom edge and has no background color. A child of the element has one, such as a button, and the center of the element is empty. The page then changes the <code class="inline-code">&lt;body&gt;</code> color with JavaScript, for example in a theme switch. The strip keeps the first color.</p>
+    </section>
+
+    <section class="card-container doc" id="try-it">
+        <h2>Try It</h2>
+        <ol>
+            <li>Select <code class="inline-code">transparent</code> for the fixed element at the bottom. The page reloads.
+                <fieldset class="test-options" id="edge-options" aria-label="Fixed element at the bottom edge">
+                    <label class="option-label test-option"><input type="radio" name="edge" value="none"><span>none</span></label>
+                    <label class="option-label test-option"><input type="radio" name="edge" value="transparent"><span><code class="inline-code">transparent</code> · the quirk</span></label>
+                    <label class="option-label test-option"><input type="radio" name="edge" value="background"><span>its own <code class="inline-code">background-color</code></span></label>
+                </fieldset>
+            </li>
+            <li>Switch to <span id="other-theme">dark</span>.
+                <div id="theme-switch" class="theme-switch" role="radiogroup" aria-label="Page background" hidden>
+                    <!-- theme.js needs the "auto" option. It is not shown: the page starts on the system setting. -->
+                    <label style="display: none"><input type="radio" name="theme" value="auto"><span>Auto</span></label>
+                    <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+                    <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+                </div>
+            </li>
+            <li>Look at the strip at the bottom of the screen on an iPhone.</li>
+        </ol>
+
+        <p class="status" id="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card-container doc" id="what-happens">
+        <h2>What Happens</h2>
+        <ul>
+            <li><code class="inline-code">transparent</code>: the element holds the small <b>Fixed</b> chip and an empty area. The strip keeps the first body color. The top of the screen and the page change.</li>
+            <li>its own <code class="inline-code">background-color</code>: the strip follows the body, because the element changes color with the body.</li>
+            <li>The same transparent element at <code class="inline-code">bottom: 100px</code> does not cause the quirk.</li>
+            <li>A transparent element with no child that has a background color does not cause the quirk.</li>
+        </ul>
+    </section>
+
+    <section class="card-container doc" id="workarounds">
+        <h2>What Fixes It</h2>
+        <ul>
+            <li>Remove the fixed element and append it again after about 500 ms:
+                <button type="button" class="page-button" id="readd">Remove and re-add fixed element</button>
+            </li>
+            <li>Give the fixed element a real <code class="inline-code">background-color</code>.</li>
+            <li>The user opens the tab overview and returns to the tab.</li>
+        </ul>
+
+        <h2>What Does Not Help</h2>
+        <ul>
+            <li>Replacing the fixed element with a clone:
+                <button type="button" class="page-button" id="clone">Replace fixed element</button>
+            </li>
+            <li>Toggling <code class="inline-code">display</code>.</li>
+            <li>Adding a <code class="inline-code">backdrop-filter</code> to the element or to the empty area.</li>
+            <li>Nudging <code class="inline-code">bottom</code> by 1px.</li>
+            <li>Leaving Safari and returning.</li>
+        </ul>
+    </section>
+
+    <section class="card-container doc" id="tested">
+        <h2>Tested</h2>
+        <p>Safari on iOS 26 and iOS 27. Notes and code examples: <a href="https://github.com/andesco/safari-color-tinting/blob/main/QUIRKS.md">Known Quirks</a>.</p>
+    </section>
+</main>
+
+<footer>
+    <p><a href="./">Safari Color Tinting: Demo</a><br /><br /><a href="https://github.com/andesco/safari-color-tinting">github.com/andesco/safari-color-tinting</a><br /><br /><a href="https://github.com/andesco/safari-color-tinting/blob/main/LICENSE">MIT License</a> · Andrew Escobar</p>
+</footer>
+
+<script>
+(() => {
+    const LABELS = {
+        none: '',
+        transparent: 'Fixed element: transparent',
+        background: 'Fixed element: own background color',
+    };
+    const params = new URLSearchParams(location.search);
+    const requested = params.get('edge');
+    const edge = Object.hasOwn(LABELS, requested) ? requested : 'none';
+
+    // The element is created while the page loads, so it exists at page load.
+    let bar = null;
+    if (edge !== 'none') {
+        bar = document.createElement('div');
+        bar.id = 'edge-bar';
+        bar.className = `edge-bar edge-bar-${edge}`;
+        const chip = document.createElement('div');
+        chip.className = 'edge-chip';
+        chip.textContent = 'Fixed';
+        const space = document.createElement('div');
+        space.className = 'edge-space';
+        bar.append(chip, space);
+        bar.setAttribute('aria-hidden', 'true');
+        document.body.append(bar);
+    }
+
+    const status = document.getElementById('status');
+    const readd = document.getElementById('readd');
+    const clone = document.getElementById('clone');
+    let note = '';
+
+    const bodyHex = () => {
+        const rgb = getComputedStyle(document.body).backgroundColor;
+        const parts = rgb.match(/\d+(\.\d+)?/g);
+        if (!parts || parts.length < 3) return rgb;
+        return '#' + parts.slice(0, 3).map((n) => Math.round(+n).toString(16).padStart(2, '0')).join('');
+    };
+
+    const render = () => {
+        const element = edge === 'none' ? 'none' : (note || edge);
+        const code = (text) => {
+            const el = document.createElement('code');
+            el.className = 'inline-code';
+            el.textContent = text;
+            return el;
+        };
+        status.replaceChildren('Body: ', code(bodyHex()), document.createElement('br'), 'Fixed element: ', code(element));
+    };
+
+    // The radio buttons set the option in the URL and reload, so the element exists at load
+    for (const input of document.querySelectorAll('input[name="edge"]')) {
+        input.checked = input.value === edge;
+        input.addEventListener('change', () => {
+            const url = new URL(location.href);
+            if (input.value === 'none') url.searchParams.delete('edge');
+            else url.searchParams.set('edge', input.value);
+            location.assign(url);
+        });
+    }
+
+    readd.disabled = clone.disabled = !bar;
+
+    // Workaround: remove the element, append it again 500 ms later
+    readd.addEventListener('click', () => {
+        if (!bar || !bar.isConnected) return;
+        const el = bar;
+        el.remove();
+        note = 'removed';
+        render();
+        setTimeout(() => {
+            document.body.append(el);
+            note = 're-added';
+            render();
+        }, 500);
+    });
+
+    // Does not help: replace the element with a copy of itself
+    clone.addEventListener('click', () => {
+        if (!bar || !bar.isConnected) return;
+        const copy = bar.cloneNode(true);
+        bar.replaceWith(copy);
+        bar = copy;
+        note = 'replaced with a clone';
+        render();
+    });
+
+    // Step 2 names the theme that is not selected. With no saved choice the
+    // page follows the system, and the matching option is shown as selected.
+    const other = document.getElementById('other-theme');
+    const syncTheme = () => {
+        const dark = document.body.classList.contains('dark-theme');
+        if (!document.documentElement.dataset.theme) document.querySelector(`input[name="theme"][value="${dark ? 'dark' : 'light'}"]`).checked = true;
+        for (const input of document.querySelectorAll('input[name="theme"]')) {
+            input.parentElement.classList.toggle('selected', input.value === (dark ? 'dark' : 'light'));
+        }
+        other.textContent = dark ? 'light' : 'dark';
+    };
+    document.addEventListener('DOMContentLoaded', syncTheme);
+    // Safari can restore the radio state after DOMContentLoaded
+    window.addEventListener('load', syncTheme);
+    window.addEventListener('pageshow', syncTheme);
+    new MutationObserver(syncTheme).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    // Keep the readout in step with the theme switch
+    new MutationObserver(render).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    render();
+})();
+</script>
+
+</body>
+</html>

@@ -10,7 +10,7 @@ View how your web browser supports color in its UI:
 
 ### [Safari Color Tinting: Demo](https://safari-color-tinting.pages.dev "Safari Color Tinting: Demo")
 
-## Safari UI
+## Tint Color
 
 Safari uses the luma (perceived brightness) of the tint color to make the text in its user interface dark or light. Refer to [Luma: Apple & Perceived Brightness][luma].
 
@@ -51,7 +51,7 @@ Safari 26 uses the <nobr><code>background-color</code></nobr> of the `<body>` el
 body { background-color: #0088FF; }
 ```
 
-Safari re-samples `body` as needed. WebKit has a live observer that directly updates the color of Safari UI as it changes.
+Safari re-samples `body` as needed. WebKit has a live observer that directly updates the color of Safari UI as it changes. One exception: when a fixed element at the edge has no background color but a child with one, Safari can keep the first color (see [Known Quirks](/QUIRKS.md)).
 
 If no `<body>` background-color is set, Safari falls back to the `<html>` element's background-color. If neither is set, Safari defaults to white in light mode and black in dark mode.
 
